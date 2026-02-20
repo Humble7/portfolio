@@ -128,7 +128,7 @@ export function ActProjects() {
                     <h3 className="text-2xl md:text-3xl font-bold mb-3">
                       {project.title}
                     </h3>
-                    <p className="text-muted leading-relaxed mb-6 max-w-lg">
+                    <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-4">
                       {project.description}
                     </p>
 
