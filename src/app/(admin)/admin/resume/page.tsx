@@ -24,6 +24,7 @@ interface Education {
   field: string;
   startDate: string;
   endDate: string | null;
+  sortOrder: number;
 }
 
 interface SkillItem {
@@ -188,6 +189,24 @@ export default function ResumePage() {
     if (d.data) setEducations((prev) => [...prev, d.data]);
   };
 
+  const saveEducation = async (edu: Education, patch: Partial<Education>) => {
+    const updated = { ...edu, ...patch };
+    await fetch(`/api/resume/education/${edu.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        institution: updated.institution,
+        degree: updated.degree,
+        field: updated.field,
+        startDate: updated.startDate,
+        endDate: updated.endDate,
+      }),
+    });
+    setEducations((prev) =>
+      prev.map((x) => (x.id === edu.id ? { ...x, ...patch } : x))
+    );
+  };
+
   const deleteEducation = async (id: string) => {
     await fetch(`/api/resume/education/${id}`, { method: "DELETE" });
     setEducations((prev) => prev.filter((e) => e.id !== id));
@@ -201,6 +220,22 @@ export default function ResumePage() {
     });
     const d = await res.json();
     if (d.data) setSkills((prev) => [...prev, d.data]);
+  };
+
+  const saveSkill = async (skill: SkillItem, patch: Partial<SkillItem>) => {
+    const updated = { ...skill, ...patch };
+    await fetch(`/api/resume/skills/${skill.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: updated.name,
+        category: updated.category,
+        proficiency: updated.proficiency,
+      }),
+    });
+    setSkills((prev) =>
+      prev.map((x) => (x.id === skill.id ? { ...x, ...patch } : x))
+    );
   };
 
   const deleteSkill = async (id: string) => {
@@ -347,100 +382,158 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {experiences.map((exp) => (
-            <div key={exp.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              {/* Logo */}
-              <div className="relative group shrink-0">
-                {exp.logoUrl ? (
-                  <img
-                    src={exp.logoUrl}
-                    alt={`${exp.company} logo`}
-                    className="w-10 h-10 rounded-lg object-contain bg-white/5"
-                  />
-                ) : (
-                  <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xs text-muted">
-                    Logo
-                  </div>
-                )}
-                <label className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
-                  <Upload size={14} className="text-white" />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={async (e) => {
-                      const file = e.target.files?.[0];
-                      if (!file) return;
-                      const formData = new FormData();
-                      formData.append("file", file);
-                      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
-                      const uploadData = await uploadRes.json();
-                      if (uploadData.data?.url) {
-                        saveExperience(exp, { logoUrl: uploadData.data.url });
-                      }
-                      e.target.value = "";
-                    }}
-                  />
-                </label>
-                {exp.logoUrl && (
-                  <button
-                    onClick={() => saveExperience(exp, { logoUrl: null })}
-                    className="absolute -top-1 -right-1 p-0.5 rounded-full bg-black/70 text-white hover:bg-red-500/70 transition-colors cursor-pointer hidden group-hover:block"
-                  >
-                    <X size={10} />
-                  </button>
-                )}
-              </div>
-              <div className="flex-1 min-w-0 space-y-1">
-                <input
-                  type="text"
-                  placeholder="Role"
-                  defaultValue={exp.role}
-                  onBlur={(e) => {
-                    const val = e.target.value.trim();
-                    if (val === exp.role) return;
-                    saveExperience(exp, { role: val });
-                  }}
-                  className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
-                />
-                <input
-                  type="text"
-                  placeholder="Company"
-                  defaultValue={exp.company}
-                  onBlur={(e) => {
-                    const val = e.target.value.trim();
-                    if (val === exp.company) return;
-                    saveExperience(exp, { company: val });
-                  }}
-                  className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
-                />
-                <div className="flex gap-2">
+            <div key={exp.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+              <div className="flex items-start gap-3">
+                {/* Logo */}
+                <div className="relative group shrink-0">
+                  {exp.logoUrl ? (
+                    <img
+                      src={exp.logoUrl}
+                      alt={`${exp.company} logo`}
+                      className="w-10 h-10 rounded-lg object-contain bg-white/5"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xs text-muted">
+                      Logo
+                    </div>
+                  )}
+                  <label className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                    <Upload size={14} className="text-white" />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+                        const formData = new FormData();
+                        formData.append("file", file);
+                        const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+                        const uploadData = await uploadRes.json();
+                        if (uploadData.data?.url) {
+                          saveExperience(exp, { logoUrl: uploadData.data.url });
+                        }
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {exp.logoUrl && (
+                    <button
+                      onClick={() => saveExperience(exp, { logoUrl: null })}
+                      className="absolute -top-1 -right-1 p-0.5 rounded-full bg-black/70 text-white hover:bg-red-500/70 transition-colors cursor-pointer hidden group-hover:block"
+                    >
+                      <X size={10} />
+                    </button>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0 space-y-1">
                   <input
                     type="text"
-                    placeholder="Location"
-                    defaultValue={exp.location || ""}
+                    placeholder="Role"
+                    defaultValue={exp.role}
                     onBlur={(e) => {
                       const val = e.target.value.trim();
-                      if (val === (exp.location || "")) return;
-                      saveExperience(exp, { location: val });
+                      if (val === exp.role) return;
+                      saveExperience(exp, { role: val });
                     }}
-                    className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                    className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                   />
                   <input
-                    type="url"
-                    placeholder="Company URL"
-                    defaultValue={exp.companyUrl || ""}
+                    type="text"
+                    placeholder="Company"
+                    defaultValue={exp.company}
                     onBlur={(e) => {
-                      const url = e.target.value.trim();
-                      if (url === (exp.companyUrl || "")) return;
-                      saveExperience(exp, { companyUrl: url || null });
+                      const val = e.target.value.trim();
+                      if (val === exp.company) return;
+                      saveExperience(exp, { company: val });
                     }}
-                    className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                    className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                  />
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Location"
+                      defaultValue={exp.location || ""}
+                      onBlur={(e) => {
+                        const val = e.target.value.trim();
+                        if (val === (exp.location || "")) return;
+                        saveExperience(exp, { location: val });
+                      }}
+                      className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                    />
+                    <input
+                      type="url"
+                      placeholder="Company URL"
+                      defaultValue={exp.companyUrl || ""}
+                      onBlur={(e) => {
+                        const url = e.target.value.trim();
+                        if (url === (exp.companyUrl || "")) return;
+                        saveExperience(exp, { companyUrl: url || null });
+                      }}
+                      className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                    />
+                  </div>
+                </div>
+                <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
+                  <Trash2 size={14} />
+                </button>
+              </div>
+              {/* Description */}
+              <textarea
+                placeholder="Description"
+                defaultValue={exp.description || ""}
+                onBlur={(e) => {
+                  const val = e.target.value.trim();
+                  if (val === (exp.description || "")) return;
+                  saveExperience(exp, { description: val });
+                }}
+                rows={2}
+                className="w-full text-xs bg-transparent border border-white/10 rounded-lg px-2 py-1.5 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 resize-none"
+              />
+              {/* Dates & Current */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <label className="text-xs text-muted">Start</label>
+                  <input
+                    type="date"
+                    defaultValue={exp.startDate ? exp.startDate.slice(0, 10) : ""}
+                    onBlur={(e) => {
+                      if (!e.target.value) return;
+                      const iso = new Date(e.target.value).toISOString();
+                      if (iso === exp.startDate) return;
+                      saveExperience(exp, { startDate: iso });
+                    }}
+                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
                   />
                 </div>
+                <div className="flex items-center gap-1">
+                  <label className="text-xs text-muted">End</label>
+                  <input
+                    type="date"
+                    defaultValue={exp.endDate ? exp.endDate.slice(0, 10) : ""}
+                    disabled={exp.current}
+                    onBlur={(e) => {
+                      const val = e.target.value || null;
+                      const iso = val ? new Date(val).toISOString() : null;
+                      if (iso === exp.endDate) return;
+                      saveExperience(exp, { endDate: iso });
+                    }}
+                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none disabled:opacity-30"
+                  />
+                </div>
+                <label className="flex items-center gap-1 text-xs text-muted cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={exp.current}
+                    onChange={(e) => {
+                      const current = e.target.checked;
+                      saveExperience(exp, { current, endDate: current ? null : exp.endDate });
+                    }}
+                    className="accent-accent"
+                  />
+                  Current
+                </label>
               </div>
-              <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
-                <Trash2 size={14} />
-              </button>
             </div>
           ))}
           {experiences.length === 0 && <p className="text-sm text-muted">No experiences added.</p>}
@@ -458,14 +551,77 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {educations.map((edu) => (
-            <div key={edu.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              <div>
-                <p className="font-medium text-sm">{edu.degree}</p>
-                <p className="text-xs text-muted">{edu.institution}</p>
+            <div key={edu.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex-1 space-y-1">
+                  <input
+                    type="text"
+                    placeholder="Degree"
+                    defaultValue={edu.degree}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val === edu.degree) return;
+                      saveEducation(edu, { degree: val });
+                    }}
+                    className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Institution"
+                    defaultValue={edu.institution}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val === edu.institution) return;
+                      saveEducation(edu, { institution: val });
+                    }}
+                    className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Field of study"
+                    defaultValue={edu.field || ""}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val === (edu.field || "")) return;
+                      saveEducation(edu, { field: val });
+                    }}
+                    className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                  />
+                </div>
+                <button onClick={() => deleteEducation(edu.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
+                  <Trash2 size={14} />
+                </button>
               </div>
-              <button onClick={() => deleteEducation(edu.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer">
-                <Trash2 size={14} />
-              </button>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-1">
+                  <label className="text-xs text-muted">Start</label>
+                  <input
+                    type="date"
+                    defaultValue={edu.startDate ? edu.startDate.slice(0, 10) : ""}
+                    onBlur={(e) => {
+                      if (!e.target.value) return;
+                      const iso = new Date(e.target.value).toISOString();
+                      if (iso === edu.startDate) return;
+                      saveEducation(edu, { startDate: iso });
+                    }}
+                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-1">
+                  <label className="text-xs text-muted">End</label>
+                  <input
+                    type="date"
+                    defaultValue={edu.endDate ? edu.endDate.slice(0, 10) : ""}
+                    onBlur={(e) => {
+                      const val = e.target.value || null;
+                      const iso = val ? new Date(val).toISOString() : null;
+                      if (iso === edu.endDate) return;
+                      saveEducation(edu, { endDate: iso });
+                    }}
+                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
+                  />
+                </div>
+              </div>
             </div>
           ))}
           {educations.length === 0 && <p className="text-sm text-muted">No education added.</p>}
@@ -483,12 +639,32 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {skills.map((skill) => (
-            <div key={skill.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              <div>
-                <p className="font-medium text-sm">{skill.name}</p>
-                <p className="text-xs text-muted">{skill.category}</p>
+            <div key={skill.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+              <div className="flex-1 min-w-0 space-y-1">
+                <input
+                  type="text"
+                  placeholder="Skill name"
+                  defaultValue={skill.name}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val === skill.name) return;
+                    saveSkill(skill, { name: val });
+                  }}
+                  className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                />
+                <input
+                  type="text"
+                  placeholder="Category"
+                  defaultValue={skill.category}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val === skill.category) return;
+                    saveSkill(skill, { category: val });
+                  }}
+                  className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                />
               </div>
-              <button onClick={() => deleteSkill(skill.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer">
+              <button onClick={() => deleteSkill(skill.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
                 <Trash2 size={14} />
               </button>
             </div>
