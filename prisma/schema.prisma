@@ -1,0 +1,152 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ProjectStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum PostStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+model Admin {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admins")
+}
+
+model Project {
+  id          String        @id @default(cuid())
+  title       String
+  slug        String        @unique
+  description String
+  content     String        @default("")
+  coverImage  String?       @map("cover_image")
+  youtubeUrl  String?       @map("youtube_url")
+  githubUrl   String?       @map("github_url")
+  liveUrl     String?       @map("live_url")
+  tags        String[]      @default([])
+  status      ProjectStatus @default(DRAFT)
+  featured    Boolean       @default(false)
+  sortOrder   Int           @default(0) @map("sort_order")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  images      ProjectImage[]
+
+  @@index([status])
+  @@index([featured])
+  @@map("projects")
+}
+
+model ProjectImage {
+  id        String  @id @default(cuid())
+  url       String
+  alt       String  @default("")
+  sortOrder Int     @default(0) @map("sort_order")
+  projectId String  @map("project_id")
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@map("project_images")
+}
+
+model BlogPost {
+  id          String     @id @default(cuid())
+  title       String
+  slug        String     @unique
+  excerpt     String     @default("")
+  content     String     @default("")
+  coverImage  String?    @map("cover_image")
+  tags        String[]   @default([])
+  status      PostStatus @default(DRAFT)
+  publishedAt DateTime?  @map("published_at")
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([slug])
+  @@map("blog_posts")
+}
+
+model ResumeProfile {
+  id          String  @id @default(cuid())
+  name        String
+  title       String
+  bio         String  @default("")
+  email       String  @default("")
+  location    String  @default("")
+  avatarUrl   String? @map("avatar_url")
+  resumeUrl   String? @map("resume_url")
+  linkedinUrl String? @map("linkedin_url")
+  githubUrl   String? @map("github_url")
+  websiteUrl  String? @map("website_url")
+
+  @@map("resume_profiles")
+}
+
+model Experience {
+  id          String    @id @default(cuid())
+  company     String
+  role        String
+  description String    @default("")
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  current     Boolean   @default(false)
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("experiences")
+}
+
+model Education {
+  id          String    @id @default(cuid())
+  institution String
+  degree      String
+  field       String    @default("")
+  startDate   DateTime  @map("start_date")
+  endDate     DateTime? @map("end_date")
+  sortOrder   Int       @default(0) @map("sort_order")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  @@map("educations")
+}
+
+model Skill {
+  id          String @id @default(cuid())
+  name        String
+  category    String @default("")
+  proficiency Int    @default(0)
+  sortOrder   Int    @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("skills")
+}
+
+model Upload {
+  id        String   @id @default(cuid())
+  filename  String
+  url       String
+  mimeType  String   @map("mime_type")
+  size      Int
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("uploads")
+}
