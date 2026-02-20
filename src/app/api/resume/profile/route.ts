@@ -2,9 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { profileSchema } from "@/validators/resume";
+import { getCache, setCache, clearCache } from "@/lib/resume-cache";
+
+const CACHE_KEY = "resume:profile";
 
 export async function GET() {
+  const cached = getCache(CACHE_KEY);
+  if (cached) return NextResponse.json({ success: true, data: cached });
+
   const profile = await prisma.resumeProfile.findFirst();
+  if (profile) setCache(CACHE_KEY, profile);
   return NextResponse.json({ success: true, data: profile });
 }
 
@@ -34,6 +41,7 @@ export async function PUT(request: Request) {
         })
       : await prisma.resumeProfile.create({ data: parsed.data });
 
+    clearCache(CACHE_KEY);
     return NextResponse.json({ success: true, data: profile });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

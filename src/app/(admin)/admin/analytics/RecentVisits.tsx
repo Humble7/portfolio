@@ -40,6 +40,9 @@ function formatVisitorLocalTime(iso: string, tz: string): string {
 export function RecentVisits({ visits }: { visits: Visit[] }) {
   const [dateFilter, setDateFilter] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
+  const [purgeDays, setPurgeDays] = useState("30");
+  const [purging, setPurging] = useState(false);
+  const [purgeResult, setPurgeResult] = useState("");
 
   const countries = useMemo(
     () => [...new Set(visits.map((v) => v.country))].sort(),
@@ -58,6 +61,26 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
     }
     return result;
   }, [visits, dateFilter, countryFilter]);
+
+  async function handlePurge() {
+    if (!confirm(`Delete all visit records older than ${purgeDays} days?`)) return;
+    setPurging(true);
+    setPurgeResult("");
+    try {
+      const res = await fetch(`/api/analytics/purge?days=${purgeDays}`, { method: "DELETE" });
+      const data = await res.json();
+      if (data.success) {
+        setPurgeResult(`Deleted ${data.deleted} records`);
+        setTimeout(() => window.location.reload(), 1500);
+      } else {
+        setPurgeResult(data.error || "Failed");
+      }
+    } catch {
+      setPurgeResult("Request failed");
+    } finally {
+      setPurging(false);
+    }
+  }
 
   if (visits.length === 0) {
     return <p className="text-muted text-sm">No visits yet.</p>;
@@ -96,6 +119,30 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
         <span className="text-xs text-muted ml-auto">
           {filtered.length} / {visits.length} visits
         </span>
+      </div>
+      <div className="flex flex-wrap items-center gap-2 mb-4">
+        <span className="text-sm text-muted">Purge records older than</span>
+        <select
+          value={purgeDays}
+          onChange={(e) => setPurgeDays(e.target.value)}
+          className={inputClass}
+        >
+          <option value="7">7 days</option>
+          <option value="14">14 days</option>
+          <option value="30">30 days</option>
+          <option value="60">60 days</option>
+          <option value="90">90 days</option>
+        </select>
+        <button
+          onClick={handlePurge}
+          disabled={purging}
+          className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg disabled:opacity-50 cursor-pointer"
+        >
+          {purging ? "Purging..." : "Purge"}
+        </button>
+        {purgeResult && (
+          <span className="text-xs text-muted">{purgeResult}</span>
+        )}
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">

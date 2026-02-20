@@ -2,11 +2,18 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { experienceSchema } from "@/validators/resume";
+import { getCache, setCache, clearCache } from "@/lib/resume-cache";
+
+const CACHE_KEY = "resume:experience";
 
 export async function GET() {
+  const cached = getCache(CACHE_KEY);
+  if (cached) return NextResponse.json({ success: true, data: cached });
+
   const experiences = await prisma.experience.findMany({
     orderBy: [{ sortOrder: "asc" }, { startDate: "desc" }],
   });
+  setCache(CACHE_KEY, experiences);
   return NextResponse.json({ success: true, data: experiences });
 }
 
@@ -35,6 +42,7 @@ export async function POST(request: Request) {
 
     const experience = await prisma.experience.create({ data });
 
+    clearCache(CACHE_KEY);
     return NextResponse.json({ success: true, data: experience }, { status: 201 });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });

@@ -92,6 +92,39 @@ export default function AdminMessagesPage() {
             {messages.length} total{unreadCount > 0 && ` · ${unreadCount} unread`}
           </p>
         </div>
+        {messages.length > 0 && (
+          <div className="flex items-center gap-2">
+            {messages.some((m) => m.read) && (
+              <button
+                onClick={async () => {
+                  if (!confirm("Delete all read messages?")) return;
+                  const readIds = messages.filter((m) => m.read).map((m) => m.id);
+                  await Promise.all(
+                    readIds.map((id) => fetch(`/api/messages/${id}`, { method: "DELETE" }))
+                  );
+                  setMessages((prev) => prev.filter((m) => !m.read));
+                  if (selected && readIds.includes(selected)) setSelected(null);
+                }}
+                className="px-3 py-1.5 text-sm bg-white/5 text-muted hover:text-foreground hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+              >
+                Delete Read
+              </button>
+            )}
+            <button
+              onClick={async () => {
+                if (!confirm(`Delete all ${messages.length} messages?`)) return;
+                await Promise.all(
+                  messages.map((m) => fetch(`/api/messages/${m.id}`, { method: "DELETE" }))
+                );
+                setMessages([]);
+                setSelected(null);
+              }}
+              className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors cursor-pointer"
+            >
+              Delete All
+            </button>
+          </div>
+        )}
       </div>
 
       {messages.length === 0 ? (
@@ -105,17 +138,17 @@ export default function AdminMessagesPage() {
           {/* Message list */}
           <div className="lg:col-span-2 space-y-1 max-h-[70vh] overflow-y-auto">
             {messages.map((msg) => (
-              <button
+              <div
                 key={msg.id}
-                onClick={() => {
-                  setSelected(msg.id);
-                  if (!msg.read) toggleRead(msg);
-                }}
-                className={`w-full text-left p-4 rounded-xl transition-colors cursor-pointer ${
+                className={`group relative w-full text-left p-4 rounded-xl transition-colors cursor-pointer ${
                   selected === msg.id
                     ? "bg-accent/10 border border-accent/20"
                     : "hover:bg-white/5 border border-transparent"
                 } ${!msg.read ? "bg-white/[0.03]" : ""}`}
+                onClick={() => {
+                  setSelected(msg.id);
+                  if (!msg.read) toggleRead(msg);
+                }}
               >
                 <div className="flex items-start justify-between gap-2">
                   <div className="min-w-0 flex-1">
@@ -130,12 +163,24 @@ export default function AdminMessagesPage() {
                     <p className="text-xs text-muted truncate mt-0.5">{msg.email}</p>
                     <p className="text-xs text-muted truncate mt-1">{msg.message}</p>
                   </div>
-                  <span className="text-xs text-muted shrink-0 flex items-center gap-1">
-                    <Clock size={10} />
-                    {formatDate(msg.createdAt)}
-                  </span>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <span className="text-xs text-muted flex items-center gap-1">
+                      <Clock size={10} />
+                      {formatDate(msg.createdAt)}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        deleteMessage(msg.id);
+                      }}
+                      className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-muted hover:text-red-400 transition-all cursor-pointer"
+                      title="Delete"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                 </div>
-              </button>
+              </div>
             ))}
           </div>
 

@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { educationSchema } from "@/validators/resume";
+import { clearCache } from "@/lib/resume-cache";
+
+const CACHE_KEY = "resume:education";
 
 export async function PUT(
   request: Request,
@@ -33,6 +36,7 @@ export async function PUT(
 
     const education = await prisma.education.update({ where: { id }, data });
 
+    clearCache(CACHE_KEY);
     return NextResponse.json({ success: true, data: education });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
@@ -52,6 +56,7 @@ export async function DELETE(
 
   try {
     await prisma.education.delete({ where: { id } });
+    clearCache(CACHE_KEY);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });

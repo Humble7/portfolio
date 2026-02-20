@@ -39,6 +39,13 @@ export default async function AnalyticsPage({
     ...(countryFilter ? { country: countryFilter } : {}),
   };
 
+  // Auto-cleanup: delete visits older than 90 days
+  const cutoff = new Date();
+  cutoff.setDate(cutoff.getDate() - 90);
+  await prisma.pageVisit.deleteMany({
+    where: { visitedAt: { lt: cutoff } },
+  });
+
   const trackVisitsEnabled = await getSetting("trackVisits");
 
   // Fetch data in parallel
