@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { FadeInOnScroll } from "@/components/scroll";
 import { Badge } from "@/components/ui";
@@ -67,7 +67,23 @@ const projects = [
 
 export function ActProjects() {
   const containerRef = useRef<HTMLElement>(null);
+  const galleryRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  const [scrollDistance, setScrollDistance] = useState(0);
+
+  useEffect(() => {
+    const measure = () => {
+      if (galleryRef.current) {
+        const totalWidth = galleryRef.current.scrollWidth;
+        const viewportWidth = window.innerWidth;
+        setScrollDistance(totalWidth - viewportWidth);
+      }
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, []);
+
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
@@ -76,15 +92,19 @@ export function ActProjects() {
   const x = useTransform(
     scrollYProgress,
     [0, 1],
-    ["0%", `-${(projects.length - 1) * 100}%`]
+    [0, -scrollDistance]
   );
+
+  // Container height: 1 screen for initial view + proportional to scroll distance
+  const screenRatio = scrollDistance > 0 ? scrollDistance / (typeof window !== "undefined" ? window.innerWidth : 1000) : projects.length - 1;
+  const containerHeight = `${100 + screenRatio * 100}vh`;
 
   return (
     <section
       ref={containerRef}
       className="relative"
       id="projects"
-      style={{ height: `${projects.length * 100}vh` }}
+      style={{ height: containerHeight }}
     >
       <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
         {/* Header */}
@@ -104,6 +124,7 @@ export function ActProjects() {
         {/* Horizontal scroll gallery */}
         <div className="flex-1 flex items-center">
           <motion.div
+            ref={galleryRef}
             className="flex gap-8 px-6"
             style={prefersReducedMotion ? {} : { x }}
           >

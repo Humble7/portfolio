@@ -52,7 +52,7 @@ function AnimatedKeyword({ children }: { children: string }) {
 
 export function ActBuilder() {
   return (
-    <section className="min-h-[250vh] py-60 px-6" id="builder">
+    <section className="py-32 px-6" id="builder">
       <div className="max-w-5xl mx-auto">
         <FadeInOnScroll>
           <p className="text-accent text-sm uppercase tracking-widest mb-4">

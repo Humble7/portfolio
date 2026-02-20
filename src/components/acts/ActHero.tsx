@@ -18,7 +18,7 @@ export function ActHero() {
   const indicatorOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
 
   return (
-    <section ref={ref} className="relative h-[200vh]">
+    <section ref={ref} className="relative h-[140vh]">
       <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
         {/* Gradient background */}
         <motion.div

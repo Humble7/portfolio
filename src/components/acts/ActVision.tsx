@@ -16,7 +16,7 @@ export function ActVision() {
   const hue = useTransform(scrollYProgress, [0, 1], [220, 280]);
 
   return (
-    <section ref={ref} className="relative h-[200vh]" id="vision">
+    <section ref={ref} className="relative h-[140vh]" id="vision">
       <div className="sticky top-0 h-screen flex items-center justify-center overflow-hidden">
         {/* Background gradient with hue rotation */}
         <motion.div

@@ -50,7 +50,7 @@ const timeline = [
 
 export function ActEngineer() {
   return (
-    <ScrollAct className="min-h-[300vh] py-60 px-6" id="engineer">
+    <ScrollAct className="py-32 px-6" id="engineer">
       <div className="max-w-4xl mx-auto">
         <FadeInOnScroll>
           <p className="text-accent text-sm uppercase tracking-widest mb-4">
