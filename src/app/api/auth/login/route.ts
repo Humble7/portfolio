@@ -43,9 +43,10 @@ export async function POST(request: Request) {
       success: true,
       data: { user: { id: admin.id, email: admin.email, name: admin.name } },
     });
-  } catch {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { success: false, error: "Internal server error" },
+      { success: false, error: "Internal server error", debug: message },
       { status: 500 }
     );
   }
