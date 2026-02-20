@@ -4,65 +4,25 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { FadeInOnScroll } from "@/components/scroll";
 import { Badge } from "@/components/ui";
-import { ExternalLink, Github, Play, Apple } from "lucide-react";
+import { ExternalLink, Github, Play } from "lucide-react";
 import { YouTubeLazy } from "@/components/projects/YouTubeLazy";
 
-const projects = [
-  {
-    title: "DotShake",
-    description:
-      "Wiggly Art Made Simple — draw, shake, and watch ordinary lines transform into lively, expressive animated art. A personal side project built with Swift, featuring intuitive drawing tools, signature wiggly line technology, and one-tap sharing. Available on iOS, iPadOS, and macOS.",
-    tags: ["Swift", "Graphics & Design", "Side Project"],
-    image: null,
-    color: "from-violet-500/20 to-fuchsia-500/20",
-    appStoreUrl: "https://apps.apple.com/us/app/dotshake/id6747894313",
-    githubUrl: null,
-    youtubeUrl: "https://www.youtube.com/watch?v=7Z6_AWqATxU",
-  },
-  {
-    title: "DiDi Trip Lifecycle",
-    description:
-      "Worked on mission-critical modules in the ride-hailing trip lifecycle — in-trip real-time coordination, trip-end page redesign with modular RIBs architecture, and marketing surfaces with A/B testing hooks.",
-    tags: ["RIBs", "Objective-C", "Swift"],
-    image: null,
-    color: "from-orange-500/20 to-amber-500/20",
-    appStoreUrl: null,
-    githubUrl: null,
-    youtubeUrl: null,
-  },
-  {
-    title: "iOS Startup Optimization",
-    description:
-      "Improved app launch time by 8% through binary rearrangement. Built a decentralized startup framework supporting priority-based task registration and dependency resolution. Restricted overuse of +load via Mach-O modification.",
-    tags: ["Mach-O", "Binary", "Performance"],
-    image: null,
-    color: "from-blue-500/20 to-purple-500/20",
-    appStoreUrl: null,
-    githubUrl: null,
-    youtubeUrl: null,
-  },
-  {
-    title: "Shopee Networking Layer",
-    description:
-      "Optimized networking with QUIC and HTTP-DNS for faster connections. Built a network monitoring library for all requests. Managed the internal networking framework used across all Shopee iOS apps.",
-    tags: ["QUIC", "HTTP-DNS", "Networking"],
-    image: null,
-    color: "from-green-500/20 to-cyan-500/20",
-    appStoreUrl: null,
-    githubUrl: null,
-    youtubeUrl: null,
-  },
-  {
-    title: "TDMN App Suite",
-    description:
-      "Migrating legacy UIKit interfaces to SwiftUI while preserving core functionalities. Maintaining and delivering regular updates for CartR, UK Strollers, and Smart Lock apps across multiple markets.",
-    tags: ["SwiftUI", "UIKit", "Migration"],
-    image: null,
-    color: "from-pink-500/20 to-violet-500/20",
-    appStoreUrl: null,
-    githubUrl: null,
-    youtubeUrl: null,
-  },
+interface Project {
+  title: string;
+  description: string;
+  tags: string[];
+  coverImage: string | null;
+  youtubeUrl: string | null;
+  githubUrl: string | null;
+  liveUrl: string | null;
+}
+
+const COLORS = [
+  "from-violet-500/20 to-fuchsia-500/20",
+  "from-orange-500/20 to-amber-500/20",
+  "from-blue-500/20 to-purple-500/20",
+  "from-green-500/20 to-cyan-500/20",
+  "from-pink-500/20 to-violet-500/20",
 ];
 
 export function ActProjects() {
@@ -70,6 +30,13 @@ export function ActProjects() {
   const galleryRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
   const [scrollDistance, setScrollDistance] = useState(0);
+  const [projects, setProjects] = useState<Project[]>([]);
+
+  useEffect(() => {
+    fetch("/api/projects?status=PUBLISHED")
+      .then((r) => { if (r.ok) return r.json(); })
+      .then((d) => { if (d?.data) setProjects(d.data); });
+  }, []);
 
   useEffect(() => {
     const measure = () => {
@@ -82,7 +49,7 @@ export function ActProjects() {
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, []);
+  }, [projects]);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -134,11 +101,15 @@ export function ActProjects() {
                 className="min-w-[85vw] md:min-w-[60vw] lg:min-w-[50vw]"
               >
                 <div
-                  className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col justify-between bg-gradient-to-br ${project.color}`}
+                  className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col justify-between bg-gradient-to-br ${COLORS[i % COLORS.length]}`}
                 >
                   {/* Project video/image */}
                   {project.youtubeUrl ? (
                     <YouTubeLazy url={project.youtubeUrl} className="mb-8" />
+                  ) : project.coverImage ? (
+                    <div className="aspect-video rounded-2xl overflow-hidden mb-8">
+                      <img src={project.coverImage} alt={project.title} className="w-full h-full object-cover" />
+                    </div>
                   ) : (
                     <div className="aspect-video rounded-2xl bg-white/5 mb-8 flex items-center justify-center">
                       <Play size={48} className="text-muted/30" />
@@ -162,15 +133,15 @@ export function ActProjects() {
                     </p>
 
                     <div className="flex items-center gap-4">
-                      {project.appStoreUrl && (
+                      {project.liveUrl && (
                         <a
-                          href={project.appStoreUrl}
+                          href={project.liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
                         >
-                          <Apple size={16} />
-                          App Store
+                          <ExternalLink size={16} />
+                          Live
                         </a>
                       )}
                       {project.githubUrl && (
