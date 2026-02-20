@@ -1,25 +1,20 @@
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { put } from "@vercel/blob";
 import { prisma } from "./prisma";
 
-const UPLOAD_DIR = path.join(process.cwd(), "public", "uploads");
+const BLOB_TOKEN = process.env.BLOB_READ_WRITE_TOKEN || process.env.portfolio_uploads_READ_WRITE_TOKEN;
 
 export async function saveUpload(file: File) {
-  await mkdir(UPLOAD_DIR, { recursive: true });
+  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
 
-  const ext = path.extname(file.name);
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`;
-  const filepath = path.join(UPLOAD_DIR, filename);
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(filepath, buffer);
-
-  const url = `/uploads/${filename}`;
+  const blob = await put(filename, file, {
+    access: "public",
+    token: BLOB_TOKEN,
+  });
 
   const upload = await prisma.upload.create({
     data: {
       filename: file.name,
-      url,
+      url: blob.url,
       mimeType: file.type,
       size: file.size,
     },

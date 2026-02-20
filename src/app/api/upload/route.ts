@@ -1,9 +1,8 @@
 import { NextResponse } from "next/server";
+import { del } from "@vercel/blob";
 import { verifyAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { saveUpload } from "@/lib/upload";
-import { unlink } from "fs/promises";
-import path from "path";
 
 export async function GET() {
   const auth = await verifyAuth();
@@ -28,9 +27,9 @@ export async function DELETE(request: Request) {
       return NextResponse.json({ success: false, error: "Not found" }, { status: 404 });
     }
 
-    // Delete file from disk
-    const filepath = path.join(process.cwd(), "public", upload.url);
-    await unlink(filepath).catch(() => {});
+    // Delete file from Vercel Blob
+    const token = process.env.BLOB_READ_WRITE_TOKEN || process.env.portfolio_uploads_READ_WRITE_TOKEN;
+    await del(upload.url, { token }).catch(() => {});
 
     await prisma.upload.delete({ where: { id } });
     return NextResponse.json({ success: true });
