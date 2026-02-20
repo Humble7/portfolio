@@ -9,9 +9,12 @@ import {
   User,
   Image,
   LogOut,
+  Menu,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const navItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
@@ -24,18 +27,36 @@ const navItems = [
 export function AdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const [open, setOpen] = useState(false);
+
+  // Close sidebar on route change
+  useEffect(() => {
+    setOpen(false);
+  }, [pathname]);
+
+  // Prevent body scroll when sidebar is open on mobile
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/admin/login");
   };
 
-  return (
-    <aside className="w-64 min-h-screen border-r border-white/5 bg-black/50 flex flex-col">
-      <div className="p-6 border-b border-white/5">
+  const sidebarContent = (
+    <>
+      <div className="p-6 border-b border-white/5 flex items-center justify-between">
         <Link href="/admin" className="text-lg font-bold tracking-tight">
           Admin
         </Link>
+        <button
+          onClick={() => setOpen(false)}
+          className="lg:hidden p-1 text-muted hover:text-foreground cursor-pointer"
+        >
+          <X size={20} />
+        </button>
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
@@ -72,6 +93,44 @@ export function AdminSidebar() {
           Logout
         </button>
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile top bar */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 border-b border-white/5 bg-black/80 backdrop-blur-sm flex items-center px-4">
+        <button
+          onClick={() => setOpen(true)}
+          className="p-1.5 text-muted hover:text-foreground cursor-pointer"
+        >
+          <Menu size={22} />
+        </button>
+        <span className="ml-3 text-sm font-bold">Admin</span>
+      </div>
+
+      {/* Mobile overlay */}
+      {open && (
+        <div
+          className="lg:hidden fixed inset-0 z-40 bg-black/60"
+          onClick={() => setOpen(false)}
+        />
+      )}
+
+      {/* Mobile slide-out sidebar */}
+      <aside
+        className={cn(
+          "lg:hidden fixed top-0 left-0 z-50 w-64 h-full bg-background border-r border-white/5 flex flex-col transition-transform duration-200",
+          open ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:flex w-64 min-h-screen border-r border-white/5 bg-black/50 flex-col">
+        {sidebarContent}
+      </aside>
+    </>
   );
 }
