@@ -4,7 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { FadeInOnScroll } from "@/components/scroll";
 import { Badge } from "@/components/ui";
-import { ExternalLink, Github, Play } from "lucide-react";
+import { Apple, Github, Play } from "lucide-react";
 import { YouTubeLazy } from "@/components/projects/YouTubeLazy";
 
 interface Project {
@@ -140,8 +140,8 @@ export function ActProjects() {
                           rel="noopener noreferrer"
                           className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
                         >
-                          <ExternalLink size={16} />
-                          Live
+                          <Apple size={16} />
+                          App Store
                         </a>
                       )}
                       {project.githubUrl && (
