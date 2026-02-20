@@ -50,7 +50,7 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
     let result = visits;
     if (dateFilter) {
       result = result.filter(
-        (v) => v.visitedAt.slice(0, 10) === dateFilter,
+        (v) => new Date(v.visitedAt).toLocaleDateString("sv-SE") === dateFilter,
       );
     }
     if (countryFilter) {
