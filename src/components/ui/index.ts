@@ -5,4 +5,5 @@ export { Badge } from "./Badge";
 export { Input } from "./Input";
 export { Textarea } from "./Textarea";
 export { Modal } from "./Modal";
+export { Toggle } from "./Toggle";
 export { ToastProvider, useToast } from "./Toast";

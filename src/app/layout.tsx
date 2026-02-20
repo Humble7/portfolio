@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { inter } from "@/styles/fonts";
 import { ToastProvider } from "@/components/ui/Toast";
+import { PageTracker } from "@/components/PageTracker";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -21,6 +22,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.variable} antialiased`}>
+        <PageTracker />
         <ToastProvider>{children}</ToastProvider>
       </body>
     </html>

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Button, Badge } from "@/components/ui";
+import { Button, Badge, Toggle } from "@/components/ui";
 import { DataTable } from "@/components/admin";
 import { Plus } from "lucide-react";
 
@@ -18,14 +18,17 @@ export default function BlogPage() {
   const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
+  const [timestampInitial, setTimestampInitial] = useState(true);
 
   useEffect(() => {
-    fetch("/api/blog")
-      .then((r) => r.json())
-      .then((d) => {
-        setPosts(d.data || []);
-        setLoading(false);
-      });
+    Promise.all([
+      fetch("/api/blog").then((r) => r.json()),
+      fetch("/api/admin/settings/showBlogTimestamp").then((r) => r.json()),
+    ]).then(([d, s]) => {
+      setPosts(d.data || []);
+      setTimestampInitial(s.data?.value !== "false");
+      setLoading(false);
+    });
   }, []);
 
   const columns = [
@@ -51,7 +54,10 @@ export default function BlogPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Blog Posts</h1>
+        <div className="flex items-center gap-4">
+          <h1 className="text-3xl font-bold">Blog Posts</h1>
+          <Toggle label="Timestamps" initial={timestampInitial} settingKey="showBlogTimestamp" />
+        </div>
         <Button onClick={() => router.push("/admin/blog/new")}>
           <Plus size={16} className="mr-2" />
           New Post

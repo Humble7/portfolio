@@ -38,9 +38,11 @@ export default async function BlogPostPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const post = await prisma.blogPost.findUnique({
-    where: { slug, status: "PUBLISHED" },
-  });
+  const [post, tsSetting] = await Promise.all([
+    prisma.blogPost.findUnique({ where: { slug, status: "PUBLISHED" } }),
+    prisma.siteSetting.findUnique({ where: { key: "showBlogTimestamp" } }),
+  ]);
+  const showTimestamp = tsSetting?.value !== "false";
 
   if (!post) notFound();
 
@@ -71,7 +73,7 @@ export default async function BlogPostPage({
             {post.title}
           </h1>
 
-          {post.publishedAt && (
+          {showTimestamp && post.publishedAt && (
             <div className="flex items-center gap-2 text-sm text-muted mb-12">
               <Calendar size={14} />
               {post.publishedAt.toLocaleDateString("en-US", {

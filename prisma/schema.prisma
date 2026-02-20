@@ -104,6 +104,9 @@ model Experience {
   company     String
   role        String
   description String    @default("")
+  logoUrl     String?   @map("logo_url")
+  companyUrl  String?   @map("company_url")
+  location    String    @default("")
   startDate   DateTime  @map("start_date")
   endDate     DateTime? @map("end_date")
   current     Boolean   @default(false)
@@ -140,6 +143,17 @@ model Skill {
   @@map("skills")
 }
 
+model Message {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("messages")
+}
+
 model Upload {
   id        String   @id @default(cuid())
   filename  String
@@ -149,4 +163,37 @@ model Upload {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("uploads")
+}
+
+model PageView {
+  id      String   @id @default(cuid())
+  path    String
+  country String   @default("XX")
+  date    DateTime @db.Date
+  count   Int      @default(1)
+
+  @@unique([path, country, date])
+  @@index([date])
+  @@index([country])
+  @@map("page_views")
+}
+
+model SiteSetting {
+  key   String @id
+  value String
+
+  @@map("site_settings")
+}
+
+model PageVisit {
+  id        String   @id @default(cuid())
+  path      String
+  country   String   @default("XX")
+  timezone  String   @default("")
+  duration  Int      @default(0)  // seconds
+  visitedAt DateTime @default(now()) @map("visited_at")
+
+  @@index([visitedAt])
+  @@index([path])
+  @@map("page_visits")
 }

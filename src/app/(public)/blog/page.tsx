@@ -11,10 +11,14 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function BlogPage() {
-  const posts = await prisma.blogPost.findMany({
-    where: { status: "PUBLISHED" },
-    orderBy: { createdAt: "desc" },
-  });
+  const [posts, tsSetting] = await Promise.all([
+    prisma.blogPost.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { createdAt: "desc" },
+    }),
+    prisma.siteSetting.findUnique({ where: { key: "showBlogTimestamp" } }),
+  ]);
+  const showTimestamp = tsSetting?.value !== "false";
 
   return (
     <>
@@ -39,7 +43,7 @@ export default async function BlogPage() {
                   excerpt={post.excerpt}
                   coverImage={post.coverImage}
                   tags={post.tags}
-                  publishedAt={post.publishedAt?.toISOString()}
+                  publishedAt={showTimestamp ? post.publishedAt?.toISOString() : undefined}
                 />
               ))}
             </div>

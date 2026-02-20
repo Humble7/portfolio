@@ -1,14 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Button, Input, Textarea, Card } from "@/components/ui";
-import { Save, Plus, Trash2, Pencil, Upload, FileText, X, Camera } from "lucide-react";
+import { Plus, Trash2, Upload, FileText, X, Camera } from "lucide-react";
 
 interface Experience {
   id: string;
   company: string;
   role: string;
   description: string;
+  logoUrl: string | null;
+  companyUrl: string | null;
+  location: string;
   startDate: string;
   endDate: string | null;
   current: boolean;
@@ -30,8 +33,21 @@ interface SkillItem {
   proficiency: number;
 }
 
+type Profile = {
+  name: string;
+  title: string;
+  bio: string;
+  email: string;
+  location: string;
+  avatarUrl: string;
+  resumeUrl: string;
+  linkedinUrl: string;
+  githubUrl: string;
+  websiteUrl: string;
+};
+
 export default function ResumePage() {
-  const [profile, setProfile] = useState({
+  const [profile, setProfile] = useState<Profile>({
     name: "",
     title: "",
     bio: "",
@@ -43,13 +59,13 @@ export default function ResumePage() {
     githubUrl: "",
     websiteUrl: "",
   });
+  const savedProfile = useRef<Profile>(profile);
   const [uploading, setUploading] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [resumeFilename, setResumeFilename] = useState("");
   const [experiences, setExperiences] = useState<Experience[]>([]);
   const [educations, setEducations] = useState<Education[]>([]);
   const [skills, setSkills] = useState<SkillItem[]>([]);
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     Promise.all([
@@ -59,7 +75,7 @@ export default function ResumePage() {
       fetch("/api/resume/skills").then((r) => r.json()),
     ]).then(async ([p, exp, edu, sk]) => {
       if (p.data) {
-        setProfile({
+        const loaded: Profile = {
           name: p.data.name || "",
           title: p.data.title || "",
           bio: p.data.bio || "",
@@ -70,7 +86,9 @@ export default function ResumePage() {
           linkedinUrl: p.data.linkedinUrl || "",
           githubUrl: p.data.githubUrl || "",
           websiteUrl: p.data.websiteUrl || "",
-        });
+        };
+        setProfile(loaded);
+        savedProfile.current = loaded;
         if (p.data.resumeUrl) {
           const u = await fetch(`/api/upload/by-url?url=${encodeURIComponent(p.data.resumeUrl)}`).then((r) => r.json());
           if (u.data?.filename) setResumeFilename(u.data.filename);
@@ -82,22 +100,38 @@ export default function ResumePage() {
     });
   }, []);
 
-  const saveProfile = async () => {
-    setSaving(true);
+  const saveProfile = useCallback(async (updated: Profile) => {
+    // Skip if nothing changed
+    if (JSON.stringify(updated) === JSON.stringify(savedProfile.current)) return;
+    savedProfile.current = updated;
     await fetch("/api/resume/profile", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...profile,
-        avatarUrl: profile.avatarUrl || null,
-        resumeUrl: profile.resumeUrl || null,
-        linkedinUrl: profile.linkedinUrl || null,
-        githubUrl: profile.githubUrl || null,
-        websiteUrl: profile.websiteUrl || null,
+        ...updated,
+        avatarUrl: updated.avatarUrl || null,
+        resumeUrl: updated.resumeUrl || null,
+        linkedinUrl: updated.linkedinUrl || null,
+        githubUrl: updated.githubUrl || null,
+        websiteUrl: updated.websiteUrl || null,
       }),
     });
-    setSaving(false);
-  };
+  }, []);
+
+  // Auto-save profile on blur
+  const handleProfileBlur = () => saveProfile(profile);
+
+  // Auto-save when avatar/resume URL changes (uploaded or removed)
+  const updateProfileField = useCallback(
+    (field: keyof Profile, value: string) => {
+      setProfile((p) => {
+        const updated = { ...p, [field]: value };
+        saveProfile(updated);
+        return updated;
+      });
+    },
+    [saveProfile]
+  );
 
   const addExperience = async () => {
     const res = await fetch("/api/resume/experience", {
@@ -116,6 +150,28 @@ export default function ResumePage() {
   const deleteExperience = async (id: string) => {
     await fetch(`/api/resume/experience/${id}`, { method: "DELETE" });
     setExperiences((prev) => prev.filter((e) => e.id !== id));
+  };
+
+  const saveExperience = async (exp: Experience, patch: Partial<Experience>) => {
+    const updated = { ...exp, ...patch };
+    await fetch(`/api/resume/experience/${exp.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        company: updated.company,
+        role: updated.role,
+        description: updated.description,
+        logoUrl: updated.logoUrl,
+        companyUrl: updated.companyUrl,
+        location: updated.location,
+        startDate: updated.startDate,
+        endDate: updated.endDate,
+        current: updated.current,
+      }),
+    });
+    setExperiences((prev) =>
+      prev.map((x) => (x.id === exp.id ? { ...x, ...patch } : x))
+    );
   };
 
   const addEducation = async () => {
@@ -190,7 +246,7 @@ export default function ResumePage() {
                     const res = await fetch("/api/upload", { method: "POST", body: formData });
                     const data = await res.json();
                     if (data.data?.url) {
-                      setProfile((p) => ({ ...p, avatarUrl: data.data.url }));
+                      updateProfileField("avatarUrl", data.data.url);
                     }
                     setUploadingAvatar(false);
                     e.target.value = "";
@@ -199,7 +255,7 @@ export default function ResumePage() {
               </label>
               {profile.avatarUrl && (
                 <button
-                  onClick={() => setProfile((p) => ({ ...p, avatarUrl: "" }))}
+                  onClick={() => updateProfileField("avatarUrl", "")}
                   className="absolute -top-1 -right-1 p-1 rounded-full bg-black/70 text-white hover:bg-red-500/70 transition-colors cursor-pointer"
                 >
                   <X size={12} />
@@ -212,23 +268,19 @@ export default function ResumePage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input id="name" label="Name" value={profile.name} onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))} />
-            <Input id="title" label="Title" value={profile.title} onChange={(e) => setProfile((p) => ({ ...p, title: e.target.value }))} />
+            <Input id="name" label="Name" value={profile.name} onChange={(e) => setProfile((p) => ({ ...p, name: e.target.value }))} onBlur={handleProfileBlur} />
+            <Input id="title" label="Title" value={profile.title} onChange={(e) => setProfile((p) => ({ ...p, title: e.target.value }))} onBlur={handleProfileBlur} />
           </div>
-          <Textarea id="bio" label="Bio" value={profile.bio} onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))} />
+          <Textarea id="bio" label="Bio" value={profile.bio} onChange={(e) => setProfile((p) => ({ ...p, bio: e.target.value }))} onBlur={handleProfileBlur} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <Input id="pemail" label="Email" value={profile.email} onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))} />
-            <Input id="location" label="Location" value={profile.location} onChange={(e) => setProfile((p) => ({ ...p, location: e.target.value }))} />
+            <Input id="pemail" label="Email" value={profile.email} onChange={(e) => setProfile((p) => ({ ...p, email: e.target.value }))} onBlur={handleProfileBlur} />
+            <Input id="location" label="Location" value={profile.location} onChange={(e) => setProfile((p) => ({ ...p, location: e.target.value }))} onBlur={handleProfileBlur} />
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Input id="linkedin" label="LinkedIn" value={profile.linkedinUrl} onChange={(e) => setProfile((p) => ({ ...p, linkedinUrl: e.target.value }))} />
-            <Input id="github" label="GitHub" value={profile.githubUrl} onChange={(e) => setProfile((p) => ({ ...p, githubUrl: e.target.value }))} />
-            <Input id="website" label="Website" value={profile.websiteUrl} onChange={(e) => setProfile((p) => ({ ...p, websiteUrl: e.target.value }))} />
+            <Input id="linkedin" label="LinkedIn" value={profile.linkedinUrl} onChange={(e) => setProfile((p) => ({ ...p, linkedinUrl: e.target.value }))} onBlur={handleProfileBlur} />
+            <Input id="github" label="GitHub" value={profile.githubUrl} onChange={(e) => setProfile((p) => ({ ...p, githubUrl: e.target.value }))} onBlur={handleProfileBlur} />
+            <Input id="website" label="Website" value={profile.websiteUrl} onChange={(e) => setProfile((p) => ({ ...p, websiteUrl: e.target.value }))} onBlur={handleProfileBlur} />
           </div>
-          <Button onClick={saveProfile} disabled={saving}>
-            <Save size={16} className="mr-2" />
-            {saving ? "Saving..." : "Save Profile"}
-          </Button>
         </div>
       </Card>
 
@@ -247,7 +299,7 @@ export default function ResumePage() {
               {resumeFilename || "Resume.pdf"}
             </a>
             <button
-              onClick={() => setProfile((p) => ({ ...p, resumeUrl: "" }))}
+              onClick={() => updateProfileField("resumeUrl", "")}
               className="p-1.5 text-muted hover:text-red-400 cursor-pointer"
               title="Remove"
             >
@@ -274,7 +326,7 @@ export default function ResumePage() {
               const res = await fetch("/api/upload", { method: "POST", body: formData });
               const data = await res.json();
               if (data.data?.url) {
-                setProfile((p) => ({ ...p, resumeUrl: data.data.url }));
+                updateProfileField("resumeUrl", data.data.url);
                 setResumeFilename(file.name);
               }
               setUploading(false);
@@ -282,7 +334,6 @@ export default function ResumePage() {
             }}
           />
         </label>
-        <p className="text-xs text-muted mt-2">Upload a PDF then click &quot;Save Profile&quot; above to persist.</p>
       </Card>
 
       {/* Experiences */}
@@ -296,12 +347,81 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {experiences.map((exp) => (
-            <div key={exp.id} className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
-              <div>
-                <p className="font-medium text-sm">{exp.role}</p>
-                <p className="text-xs text-muted">{exp.company}</p>
+            <div key={exp.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+              {/* Logo */}
+              <div className="relative group shrink-0">
+                {exp.logoUrl ? (
+                  <img
+                    src={exp.logoUrl}
+                    alt={`${exp.company} logo`}
+                    className="w-10 h-10 rounded-lg object-contain bg-white/5"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xs text-muted">
+                    Logo
+                  </div>
+                )}
+                <label className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <Upload size={14} className="text-white" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      const formData = new FormData();
+                      formData.append("file", file);
+                      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+                      const uploadData = await uploadRes.json();
+                      if (uploadData.data?.url) {
+                        saveExperience(exp, { logoUrl: uploadData.data.url });
+                      }
+                      e.target.value = "";
+                    }}
+                  />
+                </label>
+                {exp.logoUrl && (
+                  <button
+                    onClick={() => saveExperience(exp, { logoUrl: null })}
+                    className="absolute -top-1 -right-1 p-0.5 rounded-full bg-black/70 text-white hover:bg-red-500/70 transition-colors cursor-pointer hidden group-hover:block"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
               </div>
-              <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer">
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm">{exp.role}</p>
+                <p className="text-xs text-muted">
+                  {exp.company}
+                  {exp.location && ` — ${exp.location}`}
+                </p>
+                <div className="flex gap-2 mt-1">
+                  <input
+                    type="text"
+                    placeholder="Location"
+                    defaultValue={exp.location || ""}
+                    onBlur={(e) => {
+                      const val = e.target.value.trim();
+                      if (val === (exp.location || "")) return;
+                      saveExperience(exp, { location: val });
+                    }}
+                    className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                  />
+                  <input
+                    type="url"
+                    placeholder="Company URL"
+                    defaultValue={exp.companyUrl || ""}
+                    onBlur={(e) => {
+                      const url = e.target.value.trim();
+                      if (url === (exp.companyUrl || "")) return;
+                      saveExperience(exp, { companyUrl: url || null });
+                    }}
+                    className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                  />
+                </div>
+              </div>
+              <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
                 <Trash2 size={14} />
               </button>
             </div>

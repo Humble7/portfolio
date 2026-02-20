@@ -8,6 +8,8 @@ import {
   FileText,
   User,
   Image,
+  MessageSquare,
+  BarChart3,
   LogOut,
   Menu,
   X,
@@ -22,6 +24,8 @@ const navItems = [
   { href: "/admin/blog", label: "Blog", icon: FileText },
   { href: "/admin/resume", label: "Resume", icon: User },
   { href: "/admin/uploads", label: "Media", icon: Image },
+  { href: "/admin/messages", label: "Messages", icon: MessageSquare },
+  { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 
 export function AdminSidebar() {

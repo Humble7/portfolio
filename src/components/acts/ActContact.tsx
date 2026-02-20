@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { GlassPanel, Button, Input, Textarea } from "@/components/ui";
 import { FadeInOnScroll } from "@/components/scroll";
-import { Send, Github, Linkedin, Mail } from "lucide-react";
+import { Send, Github, Linkedin, Mail, Check, AlertCircle, Copy } from "lucide-react";
 import { SOCIAL_LINKS } from "@/lib/constants";
+
+const EMAIL = "chenzhennba@gmail.com";
 
 export function ActContact() {
   const [formState, setFormState] = useState({
@@ -12,11 +14,59 @@ export function ActContact() {
     email: "",
     message: "",
   });
+  const [honeypot, setHoneypot] = useState("");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
+  const [emailCopied, setEmailCopied] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
+  const [errors, setErrors] = useState<{ name?: string; email?: string; message?: string }>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const validate = (): boolean => {
+    const errs: typeof errors = {};
+    const { name, email, message } = formState;
+
+    if (!name.trim()) errs.name = "Name is required";
+    else if (name.length > 100) errs.name = "Name is too long (max 100)";
+
+    if (!email.trim()) errs.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Invalid email format";
+
+    if (!message.trim()) errs.message = "Message is required";
+    else if (message.length > 2000) errs.message = "Message is too long (max 2000)";
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Wire up to API
-    console.log("Contact form submitted:", formState);
+
+    // Client-side validation — avoid unnecessary API calls
+    if (!validate()) return;
+
+    setStatus("sending");
+
+    try {
+      const res = await fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formState, website: honeypot }),
+      });
+
+      if (res.ok) {
+        setStatus("sent");
+        setFormState({ name: "", email: "", message: "" });
+        setTimeout(() => setStatus("idle"), 4000);
+      } else {
+        const json = await res.json();
+        setErrorMsg(json.error || "Failed to send");
+        setStatus("error");
+        setTimeout(() => setStatus("idle"), 4000);
+      }
+    } catch {
+      setErrorMsg("Network error");
+      setStatus("error");
+      setTimeout(() => setStatus("idle"), 4000);
+    }
   };
 
   return (
@@ -37,37 +87,81 @@ export function ActContact() {
             <GlassPanel hover3d className="h-full p-8">
               <h3 className="text-xl font-semibold mb-6">Send a Message</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
+                {/* Honeypot field — hidden from real users, bots fill it */}
+                <div className="absolute opacity-0 h-0 overflow-hidden" aria-hidden="true" tabIndex={-1}>
+                  <input
+                    type="text"
+                    name="website"
+                    autoComplete="off"
+                    value={honeypot}
+                    onChange={(e) => setHoneypot(e.target.value)}
+                  />
+                </div>
                 <Input
                   id="name"
                   label="Name"
                   placeholder="Your name"
+                  required
+                  maxLength={100}
                   value={formState.name}
-                  onChange={(e) =>
-                    setFormState((s) => ({ ...s, name: e.target.value }))
-                  }
+                  error={errors.name}
+                  onChange={(e) => {
+                    setFormState((s) => ({ ...s, name: e.target.value }));
+                    if (errors.name) setErrors((e) => ({ ...e, name: undefined }));
+                  }}
                 />
                 <Input
                   id="email"
                   label="Email"
                   type="email"
                   placeholder="you@example.com"
+                  required
                   value={formState.email}
-                  onChange={(e) =>
-                    setFormState((s) => ({ ...s, email: e.target.value }))
-                  }
+                  error={errors.email}
+                  onChange={(e) => {
+                    setFormState((s) => ({ ...s, email: e.target.value }));
+                    if (errors.email) setErrors((e) => ({ ...e, email: undefined }));
+                  }}
                 />
                 <Textarea
                   id="message"
                   label="Message"
                   placeholder="What's on your mind?"
+                  required
+                  maxLength={2000}
                   value={formState.message}
-                  onChange={(e) =>
-                    setFormState((s) => ({ ...s, message: e.target.value }))
-                  }
+                  error={errors.message}
+                  onChange={(e) => {
+                    setFormState((s) => ({ ...s, message: e.target.value }));
+                    if (errors.message) setErrors((e) => ({ ...e, message: undefined }));
+                  }}
                 />
-                <Button type="submit" className="w-full gap-2">
-                  <Send size={16} />
-                  Send Message
+                <Button
+                  type="submit"
+                  className="w-full gap-2"
+                  disabled={status === "sending" || status === "sent"}
+                >
+                  {status === "sending" ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-current" />
+                      Sending...
+                    </>
+                  ) : status === "sent" ? (
+                    <>
+                      <Check size={16} />
+                      Message Sent!
+                    </>
+                  ) : status === "error" ? (
+                    <>
+                      <AlertCircle size={16} />
+                      {errorMsg || "Failed — Try Again"}
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      Send Message
+                    </>
+                  )}
                 </Button>
               </form>
             </GlassPanel>
@@ -85,18 +179,28 @@ export function ActContact() {
               </div>
 
               <div className="space-y-4">
-                <a
-                  href={SOCIAL_LINKS.email}
-                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(EMAIL);
+                    setEmailCopied(true);
+                    setTimeout(() => setEmailCopied(false), 2000);
+                  }}
+                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group w-full text-left cursor-pointer"
                 >
                   <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    <Mail size={18} className="text-accent" />
+                    {emailCopied ? (
+                      <Check size={18} className="text-green-400" />
+                    ) : (
+                      <Mail size={18} className="text-accent" />
+                    )}
                   </div>
                   <div>
-                    <p className="text-sm font-medium">Email</p>
-                    <p className="text-xs text-muted">chenzhennba@gmail.com</p>
+                    <p className="text-sm font-medium">
+                      {emailCopied ? "Copied!" : "Email"}
+                    </p>
+                    <p className="text-xs text-muted">{EMAIL}</p>
                   </div>
-                </a>
+                </button>
 
                 <a
                   href={SOCIAL_LINKS.github}
