@@ -1,6 +1,6 @@
-// In-memory cache for resume data (profile, experience, education, skills).
-// Public visitors hit these endpoints on every page view; caching avoids
-// redundant DB round-trips for data that rarely changes.
+// In-memory TTL cache for public API responses.
+// Avoids redundant DB round-trips for data that rarely changes.
+// Write operations (POST/PUT/DELETE) should call clearCache() to invalidate.
 
 interface CacheEntry<T> {
   data: T;
@@ -23,4 +23,11 @@ export function setCache<T>(key: string, data: T): void {
 
 export function clearCache(key: string): void {
   store.delete(key);
+}
+
+/** Clear all keys that start with a given prefix (e.g. "blog:" clears "blog:list", "blog:abc123") */
+export function clearCachePrefix(prefix: string): void {
+  for (const key of store.keys()) {
+    if (key.startsWith(prefix)) store.delete(key);
+  }
 }

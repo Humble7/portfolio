@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { createProjectSchema } from "@/validators/project";
+import { getCache, setCache, clearCachePrefix } from "@/lib/api-cache";
+
+const CACHE_KEY = "projects:published";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -16,11 +19,20 @@ export async function GET(request: Request) {
   const auth = await verifyAuth();
   if (!auth) where.status = "PUBLISHED";
 
+  // Cache only the default public query (status=PUBLISHED, no other filters)
+  const isPublicDefault = !auth && !featured && (!status || status === "PUBLISHED");
+  if (isPublicDefault) {
+    const cached = getCache(CACHE_KEY);
+    if (cached) return NextResponse.json({ success: true, data: cached });
+  }
+
   const projects = await prisma.project.findMany({
     where,
     include: { images: { orderBy: { sortOrder: "asc" } } },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
   });
+
+  if (isPublicDefault) setCache(CACHE_KEY, projects);
 
   return NextResponse.json({ success: true, data: projects });
 }
@@ -50,6 +62,7 @@ export async function POST(request: Request) {
       include: { images: true },
     });
 
+    clearCachePrefix("projects:");
     return NextResponse.json({ success: true, data: project }, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Internal server error";

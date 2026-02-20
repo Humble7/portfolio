@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { createBlogSchema } from "@/validators/blog";
+import { getCache, setCache, clearCachePrefix } from "@/lib/api-cache";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -13,7 +14,7 @@ export async function GET(request: Request) {
   const auth = await verifyAuth();
   const isPublic = !auth;
 
-  // Full-text search path
+  // Full-text search — skip cache (too many variations)
   if (q) {
     const posts = await prisma.$queryRaw`
       SELECT * FROM blog_posts
@@ -31,6 +32,16 @@ export async function GET(request: Request) {
     return NextResponse.json({ success: true, data: posts });
   }
 
+  // Cache key based on public filters
+  const cacheKey = isPublic
+    ? `blog:list:${category || "all"}:${tag || "all"}`
+    : null;
+
+  if (cacheKey) {
+    const cached = getCache(cacheKey);
+    if (cached) return NextResponse.json({ success: true, data: cached });
+  }
+
   // Standard Prisma path
   const where: Record<string, unknown> = {};
   if (status) where.status = status;
@@ -42,6 +53,8 @@ export async function GET(request: Request) {
     where,
     orderBy: { createdAt: "desc" },
   });
+
+  if (cacheKey) setCache(cacheKey, posts);
 
   return NextResponse.json({ success: true, data: posts });
 }
@@ -73,6 +86,7 @@ export async function POST(request: Request) {
 
     const post = await prisma.blogPost.create({ data: data as Parameters<typeof prisma.blogPost.create>[0]["data"] });
 
+    clearCachePrefix("blog:");
     return NextResponse.json({ success: true, data: post }, { status: 201 });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "";

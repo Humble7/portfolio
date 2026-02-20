@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { experienceSchema } from "@/validators/resume";
-import { clearCache } from "@/lib/resume-cache";
+import { clearCache } from "@/lib/api-cache";
 
 const CACHE_KEY = "resume:experience";
 

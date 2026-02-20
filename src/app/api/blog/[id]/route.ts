@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { updateBlogSchema } from "@/validators/blog";
+import { clearCachePrefix } from "@/lib/api-cache";
 
 export async function GET(
   _request: Request,
@@ -55,6 +56,7 @@ export async function PUT(
       data: data as Parameters<typeof prisma.blogPost.update>[0]["data"],
     });
 
+    clearCachePrefix("blog:");
     return NextResponse.json({ success: true, data: post });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
@@ -74,6 +76,7 @@ export async function DELETE(
 
   try {
     await prisma.blogPost.delete({ where: { id } });
+    clearCachePrefix("blog:");
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ success: false, error: "Post not found" }, { status: 404 });

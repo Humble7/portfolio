@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { updateProjectSchema } from "@/validators/project";
+import { clearCachePrefix } from "@/lib/api-cache";
 
 export async function GET(
   _request: Request,
@@ -64,6 +65,7 @@ export async function PUT(
       include: { images: true },
     });
 
+    clearCachePrefix("projects:");
     return NextResponse.json({ success: true, data: project });
   } catch {
     return NextResponse.json(
@@ -89,6 +91,7 @@ export async function DELETE(
 
   try {
     await prisma.project.delete({ where: { id } });
+    clearCachePrefix("projects:");
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(

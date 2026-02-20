@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
+import { clearCachePrefix } from "@/lib/api-cache";
 
 export async function PUT(
   request: Request,
@@ -27,6 +28,7 @@ export async function PUT(
       where: { id },
       data,
     });
+    clearCachePrefix("blog:");
     return NextResponse.json({ success: true, data: category });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "";
@@ -64,5 +66,6 @@ export async function DELETE(
 
   await prisma.blogCategory.delete({ where: { id } });
 
+  clearCachePrefix("blog:");
   return NextResponse.json({ success: true });
 }
