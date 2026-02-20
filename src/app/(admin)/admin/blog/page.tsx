@@ -58,10 +58,15 @@ export default function BlogPage() {
           <h1 className="text-3xl font-bold">Blog Posts</h1>
           <Toggle label="Timestamps" initial={timestampInitial} settingKey="showBlogTimestamp" />
         </div>
-        <Button onClick={() => router.push("/admin/blog/new")}>
-          <Plus size={16} className="mr-2" />
-          New Post
-        </Button>
+        <div className="flex gap-3">
+          <Button variant="secondary" onClick={() => router.push("/admin/blog/categories")}>
+            Manage Categories
+          </Button>
+          <Button onClick={() => router.push("/admin/blog/new")}>
+            <Plus size={16} className="mr-2" />
+            New Post
+          </Button>
+        </div>
       </div>
       <DataTable
         columns={columns}

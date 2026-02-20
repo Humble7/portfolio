@@ -7,6 +7,7 @@ export const createBlogSchema = z.object({
   content: z.string().optional().default(""),
   coverImage: z.string().optional().nullable(),
   tags: z.array(z.string()).optional().default([]),
+  category: z.string().optional().default("General"),
   status: z.enum(["DRAFT", "PUBLISHED", "ARCHIVED"]).optional().default("DRAFT"),
   publishedAt: z.string().datetime().optional().nullable(),
 });

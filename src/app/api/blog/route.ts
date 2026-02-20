@@ -7,13 +7,36 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const status = searchParams.get("status");
   const tag = searchParams.get("tag");
-
-  const where: Record<string, unknown> = {};
-  if (status) where.status = status;
-  if (tag) where.tags = { has: tag };
+  const category = searchParams.get("category");
+  const q = searchParams.get("q")?.trim() || "";
 
   const auth = await verifyAuth();
-  if (!auth) where.status = "PUBLISHED";
+  const isPublic = !auth;
+
+  // Full-text search path
+  if (q) {
+    const posts = await prisma.$queryRaw`
+      SELECT * FROM blog_posts
+      WHERE (${isPublic}::boolean = false OR status = 'PUBLISHED')
+        AND (${status}::text IS NULL OR status = ${status ?? ""}::text)
+        AND (${category}::text IS NULL OR category = ${category ?? ""}::text)
+        AND (${tag}::text IS NULL OR ${tag ?? ""}::text = ANY(tags))
+        AND to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(excerpt,'') || ' ' || coalesce(content,''))
+            @@ plainto_tsquery('simple', ${q})
+      ORDER BY ts_rank(
+        to_tsvector('simple', coalesce(title,'') || ' ' || coalesce(excerpt,'') || ' ' || coalesce(content,'')),
+        plainto_tsquery('simple', ${q})
+      ) DESC
+    `;
+    return NextResponse.json({ success: true, data: posts });
+  }
+
+  // Standard Prisma path
+  const where: Record<string, unknown> = {};
+  if (status) where.status = status;
+  if (isPublic) where.status = "PUBLISHED";
+  if (tag) where.tags = { has: tag };
+  if (category) where.category = category;
 
   const posts = await prisma.blogPost.findMany({
     where,

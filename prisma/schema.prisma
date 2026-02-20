@@ -65,6 +65,15 @@ model ProjectImage {
   @@map("project_images")
 }
 
+model BlogCategory {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("blog_categories")
+}
+
 model BlogPost {
   id          String     @id @default(cuid())
   title       String
@@ -73,6 +82,7 @@ model BlogPost {
   content     String     @default("")
   coverImage  String?    @map("cover_image")
   tags        String[]   @default([])
+  category    String     @default("General")
   status      PostStatus @default(DRAFT)
   publishedAt DateTime?  @map("published_at")
   createdAt   DateTime   @default(now()) @map("created_at")
@@ -80,6 +90,7 @@ model BlogPost {
 
   @@index([status])
   @@index([slug])
+  @@index([category])
   @@map("blog_posts")
 }
 
