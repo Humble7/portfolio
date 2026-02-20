@@ -1,28 +1,9 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { TextReveal, FadeInOnScroll } from "@/components/scroll";
 import { Card } from "@/components/ui";
-
-const skills = [
-  { name: "Swift", category: "Language" },
-  { name: "Objective-C", category: "Language" },
-  { name: "SwiftUI", category: "Language" },
-  { name: "JavaScript", category: "Language" },
-  { name: "Python", category: "Language" },
-  { name: "RIBs", category: "Architecture" },
-  { name: "MVVM", category: "Architecture" },
-  { name: "Coordinator", category: "Architecture" },
-  { name: "Instruments", category: "Performance" },
-  { name: "os_signpost", category: "Performance" },
-  { name: "MachOView", category: "Performance" },
-  { name: "Hopper", category: "Performance" },
-  { name: "Xcode", category: "Tooling" },
-  { name: "CocoaPods", category: "Tooling" },
-  { name: "SPM", category: "Tooling" },
-  { name: "Jenkins", category: "CI/CD" },
-];
 
 function AnimatedKeyword({ children }: { children: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -51,6 +32,14 @@ function AnimatedKeyword({ children }: { children: string }) {
 }
 
 export function ActBuilder() {
+  const [skills, setSkills] = useState<{ name: string; category: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/resume/skills")
+      .then((r) => { if (r.ok) return r.json(); })
+      .then((d) => { if (d?.data) setSkills(d.data); });
+  }, []);
+
   return (
     <section className="py-32 px-6" id="builder">
       <div className="max-w-5xl mx-auto">
