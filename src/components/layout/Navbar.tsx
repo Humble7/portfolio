@@ -10,7 +10,14 @@ export function Navbar() {
   const [hidden, setHidden] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [hideBlog, setHideBlog] = useState(false);
   const prevScroll = useRef(0);
+
+  useEffect(() => {
+    fetch("/api/admin/settings/showBlog")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.data?.value === "false") setHideBlog(true); });
+  }, []);
 
   useEffect(() => {
     const onScroll = () => {
@@ -50,7 +57,7 @@ export function Navbar() {
 
         {/* Desktop nav */}
         <ul className="hidden md:flex items-center gap-8">
-          {NAV_LINKS.map((link) => (
+          {NAV_LINKS.filter((l) => !(hideBlog && l.href === "/blog")).map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
@@ -80,7 +87,7 @@ export function Navbar() {
           className="md:hidden glass-strong border-t border-white/10"
         >
           <ul className="px-6 py-4 space-y-4">
-            {NAV_LINKS.map((link) => (
+            {NAV_LINKS.filter((l) => !(hideBlog && l.href === "/blog")).map((link) => (
               <li key={link.href}>
                 <a
                   href={link.href}

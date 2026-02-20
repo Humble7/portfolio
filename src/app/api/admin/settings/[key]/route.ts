@@ -6,11 +6,6 @@ export async function GET(
   _request: Request,
   { params }: { params: Promise<{ key: string }> }
 ) {
-  const auth = await verifyAuth();
-  if (!auth) {
-    return NextResponse.json({ success: false }, { status: 401 });
-  }
-
   const { key } = await params;
   const row = await prisma.siteSetting.findUnique({ where: { key } });
 

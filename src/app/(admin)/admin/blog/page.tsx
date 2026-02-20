@@ -19,14 +19,17 @@ export default function BlogPage() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [timestampInitial, setTimestampInitial] = useState(true);
+  const [showBlogInitial, setShowBlogInitial] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/blog").then((r) => r.json()),
       fetch("/api/admin/settings/showBlogTimestamp").then((r) => r.json()),
-    ]).then(([d, s]) => {
+      fetch("/api/admin/settings/showBlog").then((r) => r.json()),
+    ]).then(([d, s, b]) => {
       setPosts(d.data || []);
       setTimestampInitial(s.data?.value !== "false");
+      setShowBlogInitial(b.data?.value !== "false");
       setLoading(false);
     });
   }, []);
@@ -56,6 +59,7 @@ export default function BlogPage() {
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <h1 className="text-3xl font-bold">Blog Posts</h1>
+          <Toggle label="Show Blog" initial={showBlogInitial} settingKey="showBlog" />
           <Toggle label="Timestamps" initial={timestampInitial} settingKey="showBlogTimestamp" />
         </div>
         <div className="flex gap-3">
