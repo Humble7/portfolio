@@ -38,7 +38,8 @@ function formatVisitorLocalTime(iso: string, tz: string): string {
 }
 
 export function RecentVisits({ visits }: { visits: Visit[] }) {
-  const [dateFilter, setDateFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [countryFilter, setCountryFilter] = useState("");
   const [purgeDays, setPurgeDays] = useState("30");
   const [purging, setPurging] = useState(false);
@@ -51,16 +52,21 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
 
   const filtered = useMemo(() => {
     let result = visits;
-    if (dateFilter) {
+    if (dateFrom) {
       result = result.filter(
-        (v) => new Date(v.visitedAt).toLocaleDateString("sv-SE") === dateFilter,
+        (v) => new Date(v.visitedAt).toLocaleDateString("sv-SE") >= dateFrom,
+      );
+    }
+    if (dateTo) {
+      result = result.filter(
+        (v) => new Date(v.visitedAt).toLocaleDateString("sv-SE") <= dateTo,
       );
     }
     if (countryFilter) {
       result = result.filter((v) => v.country === countryFilter);
     }
     return result;
-  }, [visits, dateFilter, countryFilter]);
+  }, [visits, dateFrom, dateTo, countryFilter]);
 
   async function handlePurge() {
     if (!confirm(`Delete all visit records older than ${purgeDays} days?`)) return;
@@ -94,9 +100,18 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <input
           type="date"
-          value={dateFilter}
-          onChange={(e) => setDateFilter(e.target.value)}
+          value={dateFrom}
+          onChange={(e) => setDateFrom(e.target.value)}
           className={inputClass}
+          title="From"
+        />
+        <span className="text-xs text-muted">~</span>
+        <input
+          type="date"
+          value={dateTo}
+          onChange={(e) => setDateTo(e.target.value)}
+          className={inputClass}
+          title="To"
         />
         <select
           value={countryFilter}
@@ -108,9 +123,9 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
             <option key={c} value={c}>{c}</option>
           ))}
         </select>
-        {(dateFilter || countryFilter) && (
+        {(dateFrom || dateTo || countryFilter) && (
           <button
-            onClick={() => { setDateFilter(""); setCountryFilter(""); }}
+            onClick={() => { setDateFrom(""); setDateTo(""); setCountryFilter(""); }}
             className="px-3 py-1.5 text-sm text-muted hover:text-foreground cursor-pointer"
           >
             Clear
