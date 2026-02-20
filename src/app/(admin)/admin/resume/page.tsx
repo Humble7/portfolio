@@ -390,13 +390,30 @@ export default function ResumePage() {
                   </button>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm">{exp.role}</p>
-                <p className="text-xs text-muted">
-                  {exp.company}
-                  {exp.location && ` — ${exp.location}`}
-                </p>
-                <div className="flex gap-2 mt-1">
+              <div className="flex-1 min-w-0 space-y-1">
+                <input
+                  type="text"
+                  placeholder="Role"
+                  defaultValue={exp.role}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val === exp.role) return;
+                    saveExperience(exp, { role: val });
+                  }}
+                  className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                />
+                <input
+                  type="text"
+                  placeholder="Company"
+                  defaultValue={exp.company}
+                  onBlur={(e) => {
+                    const val = e.target.value.trim();
+                    if (val === exp.company) return;
+                    saveExperience(exp, { company: val });
+                  }}
+                  className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                />
+                <div className="flex gap-2">
                   <input
                     type="text"
                     placeholder="Location"
