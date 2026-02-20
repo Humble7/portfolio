@@ -6,6 +6,8 @@ import { getCountryFromIP } from "@/lib/geo";
 import { rateLimit } from "@/lib/rate-limit";
 import { getSetting } from "@/lib/settings";
 
+const BOT_PATTERN = /bot|crawler|spider|crawling|facebookexternalhit|slurp|bingpreview|mediapartners|googlebot|baiduspider|yandex|sogou|duckduckbot|semrush|ahrefs|mj12bot|dotbot|petalbot|bytespider|gptbot|headlesschrome|lighthouse|pagespeed|pingdom|uptimerobot|vercel|prerender/i;
+
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -22,6 +24,12 @@ export async function POST(request: Request) {
     }
 
     const hdrs = await headers();
+
+    // Skip bot traffic
+    const ua = hdrs.get("user-agent") || "";
+    if (BOT_PATTERN.test(ua)) {
+      return NextResponse.json({ ok: true });
+    }
     const ip =
       hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       hdrs.get("x-real-ip") ||
