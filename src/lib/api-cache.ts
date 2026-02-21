@@ -2,6 +2,8 @@
 // Avoids redundant DB round-trips for data that rarely changes.
 // Write operations (POST/PUT/DELETE) should call clearCache() to invalidate.
 
+import { NextResponse } from "next/server";
+
 interface CacheEntry<T> {
   data: T;
   expires: number;
@@ -30,4 +32,18 @@ export function clearCachePrefix(prefix: string): void {
   for (const key of store.keys()) {
     if (key.startsWith(prefix)) store.delete(key);
   }
+}
+
+/**
+ * Create a JSON response with CDN cache headers.
+ * - s-maxage: CDN (Vercel Edge) caches for this many seconds
+ * - stale-while-revalidate: serve stale while refreshing in background
+ * - max-age=0: browser always revalidates with CDN (instant since edge is nearby)
+ */
+export function cachedJson(data: unknown, cdnSeconds = 60, staleSeconds = 300) {
+  return NextResponse.json(data, {
+    headers: {
+      "Cache-Control": `public, max-age=0, s-maxage=${cdnSeconds}, stale-while-revalidate=${staleSeconds}`,
+    },
+  });
 }

@@ -14,8 +14,3 @@ export const NAV_LINKS = [
   { label: "Contact", href: "/#contact" },
 ] as const;
 
-export const SOCIAL_LINKS = {
-  github: "https://github.com/Humble7",
-  linkedin: "https://www.linkedin.com/in/humble7/",
-  email: "mailto:chenzhennba@gmail.com",
-} as const;

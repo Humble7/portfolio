@@ -3,6 +3,7 @@
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { ChevronDown } from "lucide-react";
+import { useContent } from "@/lib/site-content";
 
 export function ActHero() {
   const ref = useRef<HTMLElement>(null);
@@ -16,6 +17,13 @@ export function ActHero() {
   const headlineScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
   const subtitleOpacity = useTransform(scrollYProgress, [0.1, 0.4], [0, 1]);
   const indicatorOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+
+  const title1 = useContent("hero.title1", "Crafting Native");
+  const title2 = useContent("hero.title2", "Experiences");
+  const subtitle = useContent(
+    "hero.subtitle",
+    "Senior iOS Engineer. 5+ years at DiDi, Shopee, Mozat & more.\nBuilding high-performance, user-centric mobile apps."
+  );
 
   return (
     <section ref={ref} className="relative h-[140vh]">
@@ -38,18 +46,16 @@ export function ActHero() {
           style={prefersReducedMotion ? {} : { scale: headlineScale }}
         >
           <h1 className="text-5xl sm:text-7xl md:text-[6rem] font-bold leading-[0.95] tracking-tight mb-8">
-            <span className="text-gradient">Crafting Native</span>
+            <span className="text-gradient">{title1}</span>
             <br />
-            <span className="text-foreground">Experiences</span>
+            <span className="text-foreground">{title2}</span>
           </h1>
 
           <motion.p
-            className="text-lg sm:text-xl md:text-2xl text-muted max-w-2xl mx-auto"
+            className="text-lg sm:text-xl md:text-2xl text-muted max-w-2xl mx-auto whitespace-pre-line"
             style={prefersReducedMotion ? {} : { opacity: subtitleOpacity }}
           >
-            Senior iOS Engineer. 5+ years at DiDi, Shopee, Mozat &amp; more.
-            <br />
-            Building high-performance, user-centric mobile apps.
+            {subtitle}
           </motion.p>
         </motion.div>
 

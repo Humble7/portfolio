@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { createBlogSchema } from "@/validators/blog";
-import { getCache, setCache, clearCachePrefix } from "@/lib/api-cache";
+import { getCache, setCache, clearCachePrefix, cachedJson } from "@/lib/api-cache";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -39,7 +39,7 @@ export async function GET(request: Request) {
 
   if (cacheKey) {
     const cached = getCache(cacheKey);
-    if (cached) return NextResponse.json({ success: true, data: cached });
+    if (cached) return cachedJson({ success: true, data: cached });
   }
 
   // Standard Prisma path
@@ -56,7 +56,9 @@ export async function GET(request: Request) {
 
   if (cacheKey) setCache(cacheKey, posts);
 
-  return NextResponse.json({ success: true, data: posts });
+  return cacheKey
+    ? cachedJson({ success: true, data: posts })
+    : NextResponse.json({ success: true, data: posts });
 }
 
 export async function POST(request: Request) {

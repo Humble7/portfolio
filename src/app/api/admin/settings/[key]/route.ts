@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { clearCache } from "@/lib/api-cache";
 
 export async function GET(
   _request: Request,
@@ -38,6 +39,9 @@ export async function PUT(
     update: { value },
     create: { key, value },
   });
+
+  // Invalidate site-content cache when content settings change
+  if (key.startsWith("content.")) clearCache("site-content");
 
   return NextResponse.json({ success: true });
 }

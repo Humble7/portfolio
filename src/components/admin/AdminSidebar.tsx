@@ -10,6 +10,7 @@ import {
   Image,
   MessageSquare,
   BarChart3,
+  PenLine,
   LogOut,
   Menu,
   X,
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/admin/resume", label: "Resume", icon: User },
   { href: "/admin/uploads", label: "Media", icon: Image },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
+  { href: "/admin/content", label: "Content", icon: PenLine },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
 ];
 

@@ -6,6 +6,7 @@ import { FadeInOnScroll } from "@/components/scroll";
 import { Badge } from "@/components/ui";
 import { Apple, Github, Play } from "lucide-react";
 import { YouTubeLazy } from "@/components/projects/YouTubeLazy";
+import { useContent } from "@/lib/site-content";
 
 interface Project {
   title: string;
@@ -31,6 +32,9 @@ export function ActProjects() {
   const prefersReducedMotion = useReducedMotion();
   const [scrollDistance, setScrollDistance] = useState(0);
   const [projects, setProjects] = useState<Project[]>([]);
+
+  const label = useContent("projects.label", "Chapter Three");
+  const heading = useContent("projects.heading", "Selected Work");
 
   useEffect(() => {
     fetch("/api/projects?status=PUBLISHED")
@@ -79,10 +83,10 @@ export function ActProjects() {
           <div className="max-w-7xl mx-auto">
             <FadeInOnScroll>
               <p className="text-accent text-sm uppercase tracking-widest mb-4">
-                Chapter Three
+                {label}
               </p>
               <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold">
-                Selected Work
+                {heading}
               </h2>
             </FadeInOnScroll>
           </div>

@@ -5,6 +5,7 @@ import { motion } from "motion/react";
 import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { NAV_LINKS } from "@/lib/constants";
+import { useSiteContent } from "@/lib/site-content";
 
 export function Navbar() {
   const [hidden, setHidden] = useState(false);
@@ -12,6 +13,9 @@ export function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [hideBlog, setHideBlog] = useState(false);
   const prevScroll = useRef(0);
+  const { profile } = useSiteContent();
+
+  const brandName = profile?.name || "Portfolio";
 
   useEffect(() => {
     fetch("/api/admin/settings/showBlog")
@@ -52,7 +56,7 @@ export function Navbar() {
           href="/"
           className="text-xl font-bold tracking-tight text-foreground hover:text-accent transition-colors"
         >
-          Zhen Chen
+          {brandName}
         </a>
 
         {/* Desktop nav */}

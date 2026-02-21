@@ -2,6 +2,23 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
+import { useContent } from "@/lib/site-content";
+
+/** Parse "text {gradient} more text" into mixed elements */
+function GradientHeading({ text }: { text: string }) {
+  const parts = text.split(/(\{[^}]+\})/g);
+  return (
+    <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-8">
+      {parts.map((part, i) =>
+        part.startsWith("{") && part.endsWith("}") ? (
+          <span key={i} className="text-gradient">{part.slice(1, -1)}</span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </h2>
+  );
+}
 
 export function ActVision() {
   const ref = useRef<HTMLElement>(null);
@@ -14,6 +31,13 @@ export function ActVision() {
   const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
   const scale = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0.95, 1, 1, 1.05]);
   const hue = useTransform(scrollYProgress, [0, 1], [220, 280]);
+
+  const label = useContent("vision.label", "The Vision");
+  const heading = useContent("vision.heading", "Performance is a {feature}.");
+  const description = useContent(
+    "vision.description",
+    "From binary rearrangement to QUIC networking — I believe every millisecond counts. The best apps don't just work, they feel instant. That's the standard I build to."
+  );
 
   return (
     <section ref={ref} className="relative h-[140vh]" id="vision">
@@ -39,16 +63,11 @@ export function ActVision() {
           style={prefersReducedMotion ? {} : { opacity, scale }}
         >
           <p className="text-accent text-sm uppercase tracking-widest mb-8">
-            The Vision
+            {label}
           </p>
-          <h2 className="text-4xl sm:text-5xl md:text-7xl font-bold leading-tight mb-8">
-            Performance is a{" "}
-            <span className="text-gradient">feature</span>.
-          </h2>
+          <GradientHeading text={heading} />
           <p className="text-lg md:text-xl text-muted max-w-2xl mx-auto leading-relaxed">
-            From binary rearrangement to QUIC networking — I believe every
-            millisecond counts. The best apps don&apos;t just work, they
-            feel instant. That&apos;s the standard I build to.
+            {description}
           </p>
         </motion.div>
       </div>

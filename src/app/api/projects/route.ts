@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { createProjectSchema } from "@/validators/project";
-import { getCache, setCache, clearCachePrefix } from "@/lib/api-cache";
+import { getCache, setCache, clearCachePrefix, cachedJson } from "@/lib/api-cache";
 
 const CACHE_KEY = "projects:published";
 
@@ -23,7 +23,7 @@ export async function GET(request: Request) {
   const isPublicDefault = !auth && !featured && (!status || status === "PUBLISHED");
   if (isPublicDefault) {
     const cached = getCache(CACHE_KEY);
-    if (cached) return NextResponse.json({ success: true, data: cached });
+    if (cached) return cachedJson({ success: true, data: cached });
   }
 
   const projects = await prisma.project.findMany({
@@ -34,7 +34,9 @@ export async function GET(request: Request) {
 
   if (isPublicDefault) setCache(CACHE_KEY, projects);
 
-  return NextResponse.json({ success: true, data: projects });
+  return isPublicDefault
+    ? cachedJson({ success: true, data: projects })
+    : NextResponse.json({ success: true, data: projects });
 }
 
 export async function POST(request: Request) {

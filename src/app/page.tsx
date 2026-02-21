@@ -2,6 +2,7 @@
 
 import { ScrollProvider, ScrollProgress } from "@/components/scroll";
 import { Navbar, Footer } from "@/components/layout";
+import { SiteContentProvider } from "@/lib/site-content";
 import {
   ActHero,
   ActEngineer,
@@ -13,18 +14,20 @@ import {
 
 export default function Home() {
   return (
-    <ScrollProvider>
-      <ScrollProgress />
-      <Navbar />
-      <main>
-        <ActHero />
-        <ActEngineer />
-        <ActBuilder />
-        <ActProjects />
-        <ActVision />
-        <ActContact />
-      </main>
-      <Footer />
-    </ScrollProvider>
+    <SiteContentProvider>
+      <ScrollProvider>
+        <ScrollProgress />
+        <Navbar />
+        <main>
+          <ActHero />
+          <ActEngineer />
+          <ActBuilder />
+          <ActProjects />
+          <ActVision />
+          <ActContact />
+        </main>
+        <Footer />
+      </ScrollProvider>
+    </SiteContentProvider>
   );
 }

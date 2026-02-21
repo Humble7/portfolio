@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
 import { TextReveal, FadeInOnScroll } from "@/components/scroll";
 import { Card } from "@/components/ui";
+import { useContent } from "@/lib/site-content";
 
 function AnimatedKeyword({ children }: { children: string }) {
   const ref = useRef<HTMLSpanElement>(null);
@@ -31,8 +32,38 @@ function AnimatedKeyword({ children }: { children: string }) {
   );
 }
 
+/** Parse text with {keyword} markers into mixed text + AnimatedKeyword elements */
+function RichParagraph({ text }: { text: string }) {
+  const parts = text.split(/(\{[^}]+\})/g);
+  return (
+    <p className="text-xl md:text-2xl leading-relaxed text-muted">
+      {parts.map((part, i) =>
+        part.startsWith("{") && part.endsWith("}") ? (
+          <AnimatedKeyword key={i}>{part.slice(1, -1)}</AnimatedKeyword>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </p>
+  );
+}
+
 export function ActBuilder() {
   const [skills, setSkills] = useState<{ name: string; category: string }[]>([]);
+
+  const label = useContent("builder.label", "Chapter Two");
+  const heading = useContent(
+    "builder.heading",
+    "I build native apps that feel right. Smooth, fast, and delightful."
+  );
+  const paragraph1 = useContent(
+    "builder.paragraph1",
+    "My craft lives at the intersection of {binary-level performance} and {modular architecture}. From app launch optimization to mission-critical trip modules at scale."
+  );
+  const paragraph2 = useContent(
+    "builder.paragraph2",
+    "From {RIBs architecture at DiDi} to {QUIC networking at Shopee}, I thrive in large-scale production environments."
+  );
 
   useEffect(() => {
     fetch("/api/resume/skills")
@@ -45,30 +76,21 @@ export function ActBuilder() {
       <div className="max-w-5xl mx-auto">
         <FadeInOnScroll>
           <p className="text-accent text-sm uppercase tracking-widest mb-4">
-            Chapter Two
+            {label}
           </p>
         </FadeInOnScroll>
 
         <TextReveal className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-16">
-          I build native apps that feel right. Smooth, fast, and delightful.
+          {heading}
         </TextReveal>
 
         <div className="mb-32 space-y-8 max-w-3xl">
           <FadeInOnScroll delay={0.1}>
-            <p className="text-xl md:text-2xl leading-relaxed text-muted">
-              My craft lives at the intersection of{" "}
-              <AnimatedKeyword>binary-level performance</AnimatedKeyword> and{" "}
-              <AnimatedKeyword>modular architecture</AnimatedKeyword>. From app launch
-              optimization to mission-critical trip modules at scale.
-            </p>
+            <RichParagraph text={paragraph1} />
           </FadeInOnScroll>
 
           <FadeInOnScroll delay={0.2}>
-            <p className="text-xl md:text-2xl leading-relaxed text-muted">
-              From <AnimatedKeyword>RIBs architecture at DiDi</AnimatedKeyword> to{" "}
-              <AnimatedKeyword>QUIC networking at Shopee</AnimatedKeyword>, I
-              thrive in large-scale production environments.
-            </p>
+            <RichParagraph text={paragraph2} />
           </FadeInOnScroll>
         </div>
 

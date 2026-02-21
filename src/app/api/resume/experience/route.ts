@@ -2,19 +2,19 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
 import { experienceSchema } from "@/validators/resume";
-import { getCache, setCache, clearCache } from "@/lib/api-cache";
+import { getCache, setCache, clearCache, cachedJson } from "@/lib/api-cache";
 
 const CACHE_KEY = "resume:experience";
 
 export async function GET() {
   const cached = getCache(CACHE_KEY);
-  if (cached) return NextResponse.json({ success: true, data: cached });
+  if (cached) return cachedJson({ success: true, data: cached });
 
   const experiences = await prisma.experience.findMany({
     orderBy: [{ sortOrder: "asc" }, { startDate: "desc" }],
   });
   setCache(CACHE_KEY, experiences);
-  return NextResponse.json({ success: true, data: experiences });
+  return cachedJson({ success: true, data: experiences });
 }
 
 export async function POST(request: Request) {

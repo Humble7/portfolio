@@ -4,11 +4,37 @@ import { useState } from "react";
 import { GlassPanel, Button, Input, Textarea } from "@/components/ui";
 import { FadeInOnScroll } from "@/components/scroll";
 import { Send, Github, Linkedin, Mail, Check, AlertCircle, Copy } from "lucide-react";
-import { SOCIAL_LINKS } from "@/lib/constants";
+import { useSiteContent, useContent } from "@/lib/site-content";
 
-const EMAIL = "chenzhennba@gmail.com";
+/** Parse "text {gradient} more text" into mixed elements */
+function GradientText({ text }: { text: string }) {
+  const parts = text.split(/(\{[^}]+\})/g);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.startsWith("{") && part.endsWith("}") ? (
+          <span key={i} className="text-gradient">{part.slice(1, -1)}</span>
+        ) : (
+          <span key={i}>{part}</span>
+        )
+      )}
+    </>
+  );
+}
 
 export function ActContact() {
+  const { profile } = useSiteContent();
+  const label = useContent("contact.label", "Get in Touch");
+  const heading = useContent("contact.heading", "Let's build something {together}.");
+  const description = useContent(
+    "contact.description",
+    "I'm always interested in hearing about new projects, opportunities, and ideas. Whether you want to collaborate or just say hello, I'd love to hear from you."
+  );
+
+  const email = profile?.email || "";
+  const githubUrl = profile?.githubUrl || "";
+  const linkedinUrl = profile?.linkedinUrl || "";
+
   const [formState, setFormState] = useState({
     name: "",
     email: "",
@@ -40,7 +66,6 @@ export function ActContact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Client-side validation — avoid unnecessary API calls
     if (!validate()) return;
 
     setStatus("sending");
@@ -74,11 +99,10 @@ export function ActContact() {
       <div className="max-w-4xl mx-auto">
         <FadeInOnScroll>
           <p className="text-accent text-sm uppercase tracking-widest mb-4 text-center">
-            Get in Touch
+            {label}
           </p>
           <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16">
-            Let&apos;s build something{" "}
-            <span className="text-gradient">together</span>.
+            <GradientText text={heading} />
           </h2>
         </FadeInOnScroll>
 
@@ -172,65 +196,69 @@ export function ActContact() {
               <div>
                 <h3 className="text-xl font-semibold mb-6">Connect</h3>
                 <p className="text-muted leading-relaxed mb-8">
-                  I&apos;m always interested in hearing about new projects,
-                  opportunities, and ideas. Whether you want to collaborate or
-                  just say hello, I&apos;d love to hear from you.
+                  {description}
                 </p>
               </div>
 
               <div className="space-y-4">
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(EMAIL);
-                    setEmailCopied(true);
-                    setTimeout(() => setEmailCopied(false), 2000);
-                  }}
-                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group w-full text-left cursor-pointer"
-                >
-                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    {emailCopied ? (
-                      <Check size={18} className="text-green-400" />
-                    ) : (
-                      <Mail size={18} className="text-accent" />
-                    )}
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">
-                      {emailCopied ? "Copied!" : "Email"}
-                    </p>
-                    <p className="text-xs text-muted">{EMAIL}</p>
-                  </div>
-                </button>
+                {email && (
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(email);
+                      setEmailCopied(true);
+                      setTimeout(() => setEmailCopied(false), 2000);
+                    }}
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group w-full text-left cursor-pointer"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      {emailCopied ? (
+                        <Check size={18} className="text-green-400" />
+                      ) : (
+                        <Mail size={18} className="text-accent" />
+                      )}
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">
+                        {emailCopied ? "Copied!" : "Email"}
+                      </p>
+                      <p className="text-xs text-muted">{email}</p>
+                    </div>
+                  </button>
+                )}
 
-                <a
-                  href={SOCIAL_LINKS.github}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    <Github size={18} className="text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">GitHub</p>
-                    <p className="text-xs text-muted">github.com/Humble7</p>
-                  </div>
-                </a>
+                {githubUrl && (
+                  <a
+                    href={githubUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <Github size={18} className="text-accent" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">GitHub</p>
+                      <p className="text-xs text-muted">{githubUrl.replace(/^https?:\/\//, "")}</p>
+                    </div>
+                  </a>
+                )}
 
-                <a
-                  href={SOCIAL_LINKS.linkedin}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
-                >
-                  <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
-                    <Linkedin size={18} className="text-accent" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium">LinkedIn</p>
-                    <p className="text-xs text-muted">linkedin.com/in/humble7</p>
-                  </div>
-                </a>
+                {linkedinUrl && (
+                  <a
+                    href={linkedinUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
+                      <Linkedin size={18} className="text-accent" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium">LinkedIn</p>
+                      <p className="text-xs text-muted">{linkedinUrl.replace(/^https?:\/\//, "")}</p>
+                    </div>
+                  </a>
+                )}
               </div>
             </GlassPanel>
           </FadeInOnScroll>

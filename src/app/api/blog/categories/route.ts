@@ -1,20 +1,20 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth } from "@/lib/auth";
-import { getCache, setCache, clearCache } from "@/lib/api-cache";
+import { getCache, setCache, clearCache, cachedJson } from "@/lib/api-cache";
 
 const CACHE_KEY = "blog:categories";
 
 export async function GET() {
   try {
     const cached = getCache(CACHE_KEY);
-    if (cached) return NextResponse.json({ success: true, data: cached });
+    if (cached) return cachedJson({ success: true, data: cached });
 
     const categories = await prisma.blogCategory.findMany({
       orderBy: { sortOrder: "asc" },
     });
     setCache(CACHE_KEY, categories);
-    return NextResponse.json({ success: true, data: categories });
+    return cachedJson({ success: true, data: categories });
   } catch {
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 });
   }

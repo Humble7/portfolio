@@ -5,6 +5,7 @@ import { ScrollAct } from "@/components/scroll";
 import { TextReveal } from "@/components/scroll";
 import { FadeInOnScroll } from "@/components/scroll";
 import { ParallaxLayer } from "@/components/scroll";
+import { useContent } from "@/lib/site-content";
 
 interface TimelineItem {
   id: string;
@@ -22,6 +23,9 @@ interface TimelineItem {
 export function ActEngineer() {
   const [timeline, setTimeline] = useState<TimelineItem[]>([]);
 
+  const label = useContent("engineer.label", "Chapter One");
+  const heading = useContent("engineer.heading", "Every engineer has a story. This is mine.");
+
   useEffect(() => {
     fetch("/api/resume/experience")
       .then((r) => r.json())
@@ -36,12 +40,12 @@ export function ActEngineer() {
       <div className="max-w-4xl mx-auto">
         <FadeInOnScroll>
           <p className="text-accent text-sm uppercase tracking-widest mb-4">
-            Chapter One
+            {label}
           </p>
         </FadeInOnScroll>
 
         <TextReveal className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-32">
-          Every engineer has a story. This is mine.
+          {heading}
         </TextReveal>
 
         {/* Timeline */}
