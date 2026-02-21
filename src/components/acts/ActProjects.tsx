@@ -45,22 +45,24 @@ function ProjectCardContent({ project, colorClass }: { project: Project; colorCl
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {project.tags.map((tag) => (
-          <Badge key={tag} variant="accent">
-            {tag}
-          </Badge>
-        ))}
+      <div className="flex-1 min-h-0 flex flex-col overflow-hidden">
+        <div className="flex flex-wrap gap-2 mb-4 shrink-0">
+          {project.tags.map((tag) => (
+            <Badge key={tag} variant="accent">
+              {tag}
+            </Badge>
+          ))}
+        </div>
+
+        <h3 className="text-2xl md:text-3xl font-bold mb-3 shrink-0">
+          {project.title}
+        </h3>
+        <p className="text-muted leading-relaxed max-w-lg line-clamp-4">
+          {project.description}
+        </p>
       </div>
 
-      <h3 className="text-2xl md:text-3xl font-bold mb-3">
-        {project.title}
-      </h3>
-      <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-4">
-        {project.description}
-      </p>
-
-      <div className="flex items-center gap-4 mt-auto">
+      <div className="flex items-center gap-4 shrink-0 pt-6">
         {project.liveUrl && (
           <a
             href={project.liveUrl}
