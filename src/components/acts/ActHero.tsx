@@ -45,7 +45,7 @@ export function ActHero() {
           className="relative z-10 text-center px-6 max-w-5xl mx-auto"
           style={prefersReducedMotion ? {} : { scale: headlineScale }}
         >
-          <h1 className="text-5xl sm:text-7xl md:text-[6rem] font-bold leading-[0.95] tracking-tight mb-8">
+          <h1 className="text-5xl sm:text-7xl md:text-[6rem] font-bold leading-[1.15] tracking-tight mb-8">
             <span className="text-gradient">{title1}</span>
             <br />
             <span className="text-foreground">{title2}</span>
