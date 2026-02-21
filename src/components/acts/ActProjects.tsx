@@ -207,7 +207,7 @@ function MultipleProjects({ projects, label, heading }: { projects: Project[]; l
             {projects.map((project, i) => (
               <div
                 key={project.id}
-                className="min-w-[60vw] lg:min-w-[50vw] h-[70vh] max-h-[700px]"
+                className="min-w-[60vw] lg:min-w-[50vw]"
               >
                 <ProjectCardContent project={project} colorClass={COLORS[i % COLORS.length]} />
               </div>
