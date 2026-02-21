@@ -33,56 +33,62 @@ function ProjectCardContent({ project, colorClass }: { project: Project; colorCl
     <div
       className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col overflow-hidden bg-gradient-to-br ${colorClass}`}
     >
+      {/* Media area — flex-1 min-h-0 so it shrinks to fit available space */}
       {project.youtubeUrl ? (
-        <YouTubeLazy url={project.youtubeUrl} className="mb-8 max-h-[40vh]" />
+        <div className="flex-1 min-h-0 mb-6">
+          <YouTubeLazy url={project.youtubeUrl} className="h-full" />
+        </div>
       ) : project.coverImage ? (
-        <div className="aspect-video rounded-2xl overflow-hidden mb-8 max-h-[40vh]">
+        <div className="flex-1 min-h-0 rounded-2xl overflow-hidden mb-6">
           <img src={project.coverImage} alt={project.title} className="w-full h-full object-cover" />
         </div>
       ) : (
-        <div className="aspect-video rounded-2xl bg-white/5 mb-8 max-h-[40vh] flex items-center justify-center">
+        <div className="flex-1 min-h-0 rounded-2xl bg-white/5 mb-6 flex items-center justify-center">
           <Play size={48} className="text-muted/30" />
         </div>
       )}
 
-      <div className="flex flex-wrap gap-2 mb-4">
-        {project.tags.map((tag) => (
-          <Badge key={tag} variant="accent">
-            {tag}
-          </Badge>
-        ))}
-      </div>
+      {/* Text content — shrink-0 so it always displays fully */}
+      <div className="shrink-0">
+        <div className="flex flex-wrap gap-2 mb-4">
+          {project.tags.map((tag) => (
+            <Badge key={tag} variant="accent">
+              {tag}
+            </Badge>
+          ))}
+        </div>
 
-      <h3 className="text-2xl md:text-3xl font-bold mb-3">
-        {project.title}
-      </h3>
-      <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-3">
-        {project.description}
-      </p>
+        <h3 className="text-2xl md:text-3xl font-bold mb-3">
+          {project.title}
+        </h3>
+        <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-3">
+          {project.description}
+        </p>
 
-      <div className="flex items-center gap-4 mt-auto">
-        {project.liveUrl && (
-          <a
-            href={project.liveUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
-          >
-            <Apple size={16} />
-            App Store
-          </a>
-        )}
-        {project.githubUrl && (
-          <a
-            href={project.githubUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
-          >
-            <Github size={16} />
-            Source
-          </a>
-        )}
+        <div className="flex items-center gap-4">
+          {project.liveUrl && (
+            <a
+              href={project.liveUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
+            >
+              <Apple size={16} />
+              App Store
+            </a>
+          )}
+          {project.githubUrl && (
+            <a
+              href={project.githubUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
+            >
+              <Github size={16} />
+              Source
+            </a>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -196,18 +202,16 @@ function MultipleProjects({ projects, label, heading }: { projects: Project[]; l
       <div className="sticky top-0 h-screen flex flex-col overflow-hidden">
         <SectionHeader label={label} heading={heading} />
 
-        <div className="flex-1 flex items-center">
+        <div className="flex-1 min-h-0 flex items-center py-4">
           <motion.div
             ref={galleryRef}
-            className="flex gap-8 px-6"
+            className="flex gap-8 px-6 h-full items-center"
             style={prefersReducedMotion ? {} : { x }}
           >
-            {/* Bug 3: Fixed height container for consistent card sizes */}
-            {/* Bug 5: Use project.id as key */}
             {projects.map((project, i) => (
               <div
                 key={project.id}
-                className="min-w-[60vw] lg:min-w-[50vw]"
+                className="min-w-[60vw] lg:min-w-[50vw] h-full"
               >
                 <ProjectCardContent project={project} colorClass={COLORS[i % COLORS.length]} />
               </div>
