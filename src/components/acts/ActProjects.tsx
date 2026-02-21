@@ -8,7 +8,9 @@ import { Apple, Github, Play } from "lucide-react";
 import { YouTubeLazy } from "@/components/projects/YouTubeLazy";
 import { useContent } from "@/lib/site-content";
 
+// Bug 5: Add `id` to interface so we can use stable keys
 interface Project {
+  id: string;
   title: string;
   description: string;
   tags: string[];
@@ -29,7 +31,7 @@ const COLORS = [
 function ProjectCardContent({ project, colorClass }: { project: Project; colorClass: string }) {
   return (
     <div
-      className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col justify-between bg-gradient-to-br ${colorClass}`}
+      className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col overflow-hidden bg-gradient-to-br ${colorClass}`}
     >
       {project.youtubeUrl ? (
         <YouTubeLazy url={project.youtubeUrl} className="mb-8" />
@@ -43,46 +45,44 @@ function ProjectCardContent({ project, colorClass }: { project: Project; colorCl
         </div>
       )}
 
-      <div>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags.map((tag) => (
-            <Badge key={tag} variant="accent">
-              {tag}
-            </Badge>
-          ))}
-        </div>
+      <div className="flex flex-wrap gap-2 mb-4">
+        {project.tags.map((tag) => (
+          <Badge key={tag} variant="accent">
+            {tag}
+          </Badge>
+        ))}
+      </div>
 
-        <h3 className="text-2xl md:text-3xl font-bold mb-3">
-          {project.title}
-        </h3>
-        <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-4">
-          {project.description}
-        </p>
+      <h3 className="text-2xl md:text-3xl font-bold mb-3">
+        {project.title}
+      </h3>
+      <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-4">
+        {project.description}
+      </p>
 
-        <div className="flex items-center gap-4">
-          {project.liveUrl && (
-            <a
-              href={project.liveUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
-            >
-              <Apple size={16} />
-              App Store
-            </a>
-          )}
-          {project.githubUrl && (
-            <a
-              href={project.githubUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
-            >
-              <Github size={16} />
-              Source
-            </a>
-          )}
-        </div>
+      <div className="flex items-center gap-4 mt-auto">
+        {project.liveUrl && (
+          <a
+            href={project.liveUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-accent hover:text-accent-hover transition-colors"
+          >
+            <Apple size={16} />
+            App Store
+          </a>
+        )}
+        {project.githubUrl && (
+          <a
+            href={project.githubUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-muted hover:text-foreground transition-colors"
+          >
+            <Github size={16} />
+            Source
+          </a>
+        )}
       </div>
     </div>
   );
@@ -121,19 +121,44 @@ function SingleProject({ project, label, heading }: { project: Project; label: s
   );
 }
 
-/** Multiple projects — horizontal scroll gallery */
+// Bug 4: Mobile fallback — native horizontal scroll with snap
+function MobileGallery({ projects }: { projects: Project[] }) {
+  return (
+    <div className="flex gap-6 px-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-4">
+      {projects.map((project, i) => (
+        <div
+          key={project.id}
+          className="min-w-[85vw] snap-center"
+        >
+          <ProjectCardContent project={project} colorClass={COLORS[i % COLORS.length]} />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+/** Multiple projects — horizontal scroll gallery (desktop), native scroll (mobile) */
 function MultipleProjects({ projects, label, heading }: { projects: Project[]; label: string; heading: string }) {
   const containerRef = useRef<HTMLElement>(null);
   const galleryRef = useRef<HTMLDivElement>(null);
   const prefersReducedMotion = useReducedMotion();
+  // Bug 1 & 2: Keep both scrollDistance and screenRatio in state,
+  // computed only in useEffect to avoid SSR/hydration mismatch and initial jump.
   const [scrollDistance, setScrollDistance] = useState(0);
+  const [screenRatio, setScreenRatio] = useState(projects.length - 1);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const measure = () => {
-      if (galleryRef.current) {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+
+      if (!mobile && galleryRef.current) {
         const totalWidth = galleryRef.current.scrollWidth;
         const viewportWidth = window.innerWidth;
-        setScrollDistance(totalWidth - viewportWidth);
+        const dist = totalWidth - viewportWidth;
+        setScrollDistance(dist);
+        setScreenRatio(dist > 0 ? dist / viewportWidth : projects.length - 1);
       }
     };
     measure();
@@ -148,8 +173,18 @@ function MultipleProjects({ projects, label, heading }: { projects: Project[]; l
 
   const x = useTransform(scrollYProgress, [0, 1], [0, -scrollDistance]);
 
-  const screenRatio = scrollDistance > 0 ? scrollDistance / (typeof window !== "undefined" ? window.innerWidth : 1000) : projects.length - 1;
   const containerHeight = `${100 + screenRatio * 100}vh`;
+
+  // Bug 4: On mobile, use native horizontal scroll instead of scroll-hijack
+  if (isMobile) {
+    return (
+      <section className="relative" id="projects">
+        <SectionHeader label={label} heading={heading} />
+        <MobileGallery projects={projects} />
+        <div className="h-8" />
+      </section>
+    );
+  }
 
   return (
     <section
@@ -167,10 +202,12 @@ function MultipleProjects({ projects, label, heading }: { projects: Project[]; l
             className="flex gap-8 px-6"
             style={prefersReducedMotion ? {} : { x }}
           >
+            {/* Bug 3: Fixed height container for consistent card sizes */}
+            {/* Bug 5: Use project.id as key */}
             {projects.map((project, i) => (
               <div
-                key={project.title}
-                className="min-w-[85vw] md:min-w-[60vw] lg:min-w-[50vw]"
+                key={project.id}
+                className="min-w-[60vw] lg:min-w-[50vw] h-[70vh] max-h-[700px]"
               >
                 <ProjectCardContent project={project} colorClass={COLORS[i % COLORS.length]} />
               </div>
@@ -212,6 +249,7 @@ export function ActProjects() {
   return <MultipleProjects projects={projects} label={label} heading={heading} />;
 }
 
+// Bug 6: Clamp input range so first/last dots transition correctly
 function ProjectDot({
   index,
   progress,
@@ -224,9 +262,9 @@ function ProjectDot({
   const opacity = useTransform(
     progress,
     [
-      (index - 0.5) / total,
+      Math.max(0, (index - 0.5) / total),
       index / total,
-      (index + 0.5) / total,
+      Math.min(1, (index + 0.5) / total),
     ],
     [0.3, 1, 0.3]
   );
