@@ -34,13 +34,13 @@ function ProjectCardContent({ project, colorClass }: { project: Project; colorCl
       className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col overflow-hidden bg-gradient-to-br ${colorClass}`}
     >
       {project.youtubeUrl ? (
-        <YouTubeLazy url={project.youtubeUrl} className="mb-8" />
+        <YouTubeLazy url={project.youtubeUrl} className="mb-8 max-h-[40vh]" />
       ) : project.coverImage ? (
-        <div className="aspect-video rounded-2xl overflow-hidden mb-8">
+        <div className="aspect-video rounded-2xl overflow-hidden mb-8 max-h-[40vh]">
           <img src={project.coverImage} alt={project.title} className="w-full h-full object-cover" />
         </div>
       ) : (
-        <div className="aspect-video rounded-2xl bg-white/5 mb-8 flex items-center justify-center">
+        <div className="aspect-video rounded-2xl bg-white/5 mb-8 max-h-[40vh] flex items-center justify-center">
           <Play size={48} className="text-muted/30" />
         </div>
       )}
