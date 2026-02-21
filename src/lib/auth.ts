@@ -55,7 +55,7 @@ export function getAuthCookieConfig(token: string) {
     value: token,
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 60 * 60 * 24 * 7, // 7 days
   };
@@ -67,7 +67,7 @@ export function getLogoutCookieConfig() {
     value: "",
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict" as const,
+    sameSite: "lax" as const,
     path: "/",
     maxAge: 0,
   };
