@@ -84,7 +84,7 @@ export default function CategoriesPage() {
         Back to Blog
       </button>
 
-      <h1 className="text-3xl font-bold mb-8">Manage Categories</h1>
+      <h1 className="font-serif text-4xl mb-8">Manage Categories</h1>
 
       {/* Add new category */}
       <div className="flex gap-3 mb-8 max-w-md">
@@ -106,7 +106,7 @@ export default function CategoriesPage() {
         {categories.map((cat) => (
           <div
             key={cat.id}
-            className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/10"
+            className="flex items-center gap-3 p-3 rounded-sm bg-foreground/[0.04] border hairline"
           >
             {editingId === cat.id ? (
               <>
@@ -117,7 +117,7 @@ export default function CategoriesPage() {
                     if (e.key === "Enter") handleUpdate(cat.id);
                     if (e.key === "Escape") setEditingId(null);
                   }}
-                  className="flex-1 bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
+                  className="flex-1 bg-foreground/[0.04] border hairline rounded-sm px-3 py-1.5 text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-accent/50"
                   autoFocus
                 />
                 <button
@@ -146,7 +146,7 @@ export default function CategoriesPage() {
                 </span>
                 <button
                   onClick={() => handleDelete(cat)}
-                  className="text-red-400 hover:text-red-300 cursor-pointer"
+                  className="text-red-600 hover:text-red-700 cursor-pointer"
                 >
                   <Trash2 size={14} />
                 </button>

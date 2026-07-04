@@ -8,7 +8,6 @@ import {
   Copy,
   Check,
   FileText,
-  Image as ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -34,14 +33,16 @@ export default function UploadsPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const loadUploads = async () => {
-    const res = await fetch("/api/upload");
-    const data = await res.json();
-    if (data.data) setUploads(data.data);
-  };
-
   useEffect(() => {
-    loadUploads();
+    (async () => {
+      try {
+        const res = await fetch("/api/upload");
+        const data = await res.json();
+        if (data.data) setUploads(data.data);
+      } catch {
+        // ignore fetch errors
+      }
+    })();
   }, []);
 
   const handleUpload = async (file: File) => {
@@ -84,7 +85,7 @@ export default function UploadsPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Media Library</h1>
+      <h1 className="font-serif text-4xl mb-8">Media Library</h1>
 
       {/* Upload zone */}
       <Card className="mb-8">
@@ -97,10 +98,10 @@ export default function UploadsPage() {
           onDragLeave={() => setDragActive(false)}
           onDrop={handleDrop}
           className={cn(
-            "flex flex-col items-center justify-center gap-2 p-10 rounded-xl border-2 border-dashed transition-colors cursor-pointer",
+            "flex flex-col items-center justify-center gap-2 p-10 rounded-sm border-2 border-dashed transition-colors cursor-pointer",
             dragActive
               ? "border-accent bg-accent/5"
-              : "border-white/10 hover:border-white/20"
+              : "hairline hover:border-foreground/25"
           )}
         >
           <Upload size={28} className="text-muted" />
@@ -147,10 +148,10 @@ export default function UploadsPage() {
             {uploads.map((upload) => (
               <div
                 key={upload.id}
-                className="group relative rounded-xl border border-white/5 bg-white/[0.03] overflow-hidden"
+                className="group relative rounded-sm border hairline bg-foreground/[0.03] overflow-hidden"
               >
                 {/* Preview */}
-                <div className="aspect-square flex items-center justify-center bg-white/[0.02]">
+                <div className="aspect-square flex items-center justify-center bg-foreground/[0.02]">
                   {isImage(upload.mimeType) ? (
                     <img
                       src={upload.url}
@@ -179,7 +180,7 @@ export default function UploadsPage() {
                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                   <button
                     onClick={() => copyUrl(upload)}
-                    className="p-2 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer"
+                    className="p-2 rounded-sm bg-foreground/[0.08] hover:bg-foreground/15 text-white transition-colors cursor-pointer"
                     title="Copy URL"
                   >
                     {copiedId === upload.id ? (
@@ -190,7 +191,7 @@ export default function UploadsPage() {
                   </button>
                   <button
                     onClick={() => handleDelete(upload.id)}
-                    className="p-2 rounded-lg bg-white/10 hover:bg-red-500/50 text-white transition-colors cursor-pointer"
+                    className="p-2 rounded-sm bg-foreground/[0.08] hover:bg-red-600/60 text-white transition-colors cursor-pointer"
                     title="Delete"
                   >
                     <Trash2 size={16} />

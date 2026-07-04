@@ -93,7 +93,7 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
   }
 
   const inputClass =
-    "bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent/50";
+    "bg-foreground/[0.04] border hairline rounded-sm px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent/50";
 
   return (
     <div>
@@ -151,7 +151,7 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
         <button
           onClick={handlePurge}
           disabled={purging}
-          className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg disabled:opacity-50 cursor-pointer"
+          className="px-3 py-1.5 text-sm bg-red-600/10 text-red-600 hover:bg-red-600/20 rounded-sm disabled:opacity-50 cursor-pointer"
         >
           {purging ? "Purging..." : "Purge"}
         </button>
@@ -162,7 +162,7 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="text-left text-muted border-b border-white/10">
+            <tr className="text-left text-muted border-b hairline">
               <th className="pb-2 pr-4">Page</th>
               <th className="pb-2 pr-4">Country</th>
               <th className="pb-2 pr-4">Your Time</th>
@@ -172,7 +172,7 @@ export function RecentVisits({ visits }: { visits: Visit[] }) {
           </thead>
           <tbody>
             {filtered.map((v) => (
-              <tr key={v.id} className="border-b border-white/5 last:border-0">
+              <tr key={v.id} className="border-b hairline last:border-0">
                 <td className="py-2 pr-4 truncate max-w-[200px]">{v.path}</td>
                 <td className="py-2 pr-4">{v.country}</td>
                 <td className="py-2 pr-4 text-muted whitespace-nowrap" suppressHydrationWarning>

@@ -48,10 +48,10 @@ function ToolbarButton({
       onClick={onClick}
       title={title}
       className={cn(
-        "p-1.5 rounded-lg transition-colors cursor-pointer",
+        "p-1.5 rounded-sm transition-colors cursor-pointer",
         active
           ? "bg-accent/20 text-accent"
-          : "text-muted hover:text-foreground hover:bg-white/10"
+          : "text-muted hover:text-foreground hover:bg-foreground/[0.08]"
       )}
     >
       {children}
@@ -63,9 +63,9 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
       StarterKit,
-      Image.configure({ HTMLAttributes: { class: "rounded-xl max-w-full" } }),
+      Image.configure({ HTMLAttributes: { class: "rounded-sm max-w-full" } }),
       Youtube.configure({
-        HTMLAttributes: { class: "w-full aspect-video rounded-xl" },
+        HTMLAttributes: { class: "w-full aspect-video rounded-sm" },
       }),
       Link.configure({
         openOnClick: false,
@@ -109,9 +109,9 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
   if (!editor) return null;
 
   return (
-    <div className="rounded-xl border border-white/10 bg-white/5 overflow-hidden">
+    <div className="rounded-sm border hairline bg-foreground/[0.04] overflow-hidden">
       {/* Toolbar */}
-      <div className="flex flex-wrap items-center gap-0.5 p-2 border-b border-white/10 bg-white/[0.02]">
+      <div className="flex flex-wrap items-center gap-0.5 p-2 border-b hairline bg-foreground/[0.02]">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive("bold")}
@@ -141,7 +141,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <Code size={16} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-foreground/[0.08] mx-1" />
 
         <ToolbarButton
           onClick={() =>
@@ -171,7 +171,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <Heading3 size={16} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-foreground/[0.08] mx-1" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBulletList().run()}
@@ -201,7 +201,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <Minus size={16} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-foreground/[0.08] mx-1" />
 
         <ToolbarButton onClick={addImage} title="Insert Image">
           <ImageIcon size={16} />
@@ -213,7 +213,7 @@ export function RichTextEditor({ content, onChange }: RichTextEditorProps) {
           <LinkIcon size={16} />
         </ToolbarButton>
 
-        <div className="w-px h-5 bg-white/10 mx-1" />
+        <div className="w-px h-5 bg-foreground/[0.08] mx-1" />
 
         <ToolbarButton
           onClick={() => editor.chain().focus().undo().run()}

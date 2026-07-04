@@ -34,14 +34,14 @@ export default async function AdminDashboard() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      <h1 className="font-serif text-4xl mb-8">Dashboard</h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.label} className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-sm bg-accent/10 flex items-center justify-center">
                 <Icon size={22} className="text-accent" />
               </div>
               <div>
@@ -63,7 +63,7 @@ export default async function AdminDashboard() {
               {recentProjects.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
+                  className="flex items-center justify-between py-2 border-b hairline last:border-0"
                 >
                   <span className="text-sm">{p.title}</span>
                   <span className="text-xs text-muted">{p.status}</span>
@@ -82,7 +82,7 @@ export default async function AdminDashboard() {
               {recentPosts.map((p) => (
                 <div
                   key={p.id}
-                  className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
+                  className="flex items-center justify-between py-2 border-b hairline last:border-0"
                 >
                   <span className="text-sm">{p.title}</span>
                   <span className="text-xs text-muted">{p.status}</span>

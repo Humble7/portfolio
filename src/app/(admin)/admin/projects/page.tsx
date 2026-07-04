@@ -90,7 +90,7 @@ export default function ProjectsPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Projects</h1>
+        <h1 className="font-serif text-4xl">Projects</h1>
         <div className="flex gap-2">
           {!reorderMode && (
             <Button variant="secondary" onClick={enterReorderMode}>
@@ -116,7 +116,7 @@ export default function ProjectsPage() {
               <Reorder.Item
                 key={project.id}
                 value={project}
-                className="flex items-center gap-3 p-3 bg-card border border-border rounded-lg cursor-grab active:cursor-grabbing"
+                className="flex items-center gap-3 p-3 glass rounded-sm cursor-grab active:cursor-grabbing"
               >
                 <GripVertical size={16} className="text-muted shrink-0" />
                 <span className="font-medium flex-1">{project.title}</span>

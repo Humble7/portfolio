@@ -9,6 +9,7 @@ import { ArrowLeft, Save } from "lucide-react";
 export default function NewBlogPostPage() {
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [form, setForm] = useState({
     title: "",
@@ -55,6 +56,7 @@ export default function NewBlogPostPage() {
 
       const data = await res.json();
       if (data.success) router.push("/admin/blog");
+      else setSaveError(data.error || "Save failed");
     } finally {
       setSaving(false);
     }
@@ -70,7 +72,7 @@ export default function NewBlogPostPage() {
         Back to Blog
       </button>
 
-      <h1 className="text-3xl font-bold mb-8">New Blog Post</h1>
+      <h1 className="font-serif text-4xl mb-8">New Blog Post</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
         <Input
@@ -120,7 +122,7 @@ export default function NewBlogPostPage() {
             <select
               value={form.category}
               onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full rounded-sm bg-foreground/[0.04] border hairline px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.name}>{cat.name}</option>
@@ -132,7 +134,7 @@ export default function NewBlogPostPage() {
             <select
               value={form.status}
               onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full rounded-sm bg-foreground/[0.04] border hairline px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
             >
               <option value="DRAFT">Draft</option>
               <option value="PUBLISHED">Published</option>
@@ -140,6 +142,10 @@ export default function NewBlogPostPage() {
             </select>
           </div>
         </div>
+
+        {saveError && (
+          <p className="text-sm text-red-600">{saveError}</p>
+        )}
 
         <div className="flex gap-4">
           <Button type="submit" disabled={saving}>

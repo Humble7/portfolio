@@ -245,7 +245,7 @@ export default function ResumePage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-3xl font-bold mb-8">Resume</h1>
+      <h1 className="font-serif text-4xl mb-8">Resume</h1>
 
       {/* Profile */}
       <Card className="mb-8">
@@ -258,10 +258,10 @@ export default function ResumePage() {
                 <img
                   src={profile.avatarUrl}
                   alt="Avatar"
-                  className="w-20 h-20 rounded-full object-cover border-2 border-white/10"
+                  className="w-20 h-20 rounded-full object-cover border-2 hairline"
                 />
               ) : (
-                <div className="w-20 h-20 rounded-full bg-white/10 flex items-center justify-center border-2 border-white/10">
+                <div className="w-20 h-20 rounded-full bg-foreground/[0.08] flex items-center justify-center border-2 hairline">
                   <Camera size={24} className="text-muted" />
                 </div>
               )}
@@ -323,7 +323,7 @@ export default function ResumePage() {
       <Card className="mb-8">
         <h2 className="text-xl font-semibold mb-4">Resume PDF</h2>
         {profile.resumeUrl ? (
-          <div className="flex items-center justify-between p-3 rounded-xl bg-white/[0.03] border border-white/5">
+          <div className="flex items-center justify-between p-3 rounded-sm bg-foreground/[0.03] border hairline">
             <a
               href={profile.resumeUrl}
               target="_blank"
@@ -335,7 +335,7 @@ export default function ResumePage() {
             </a>
             <button
               onClick={() => updateProfileField("resumeUrl", "")}
-              className="p-1.5 text-muted hover:text-red-400 cursor-pointer"
+              className="p-1.5 text-muted hover:text-red-600 cursor-pointer"
               title="Remove"
             >
               <X size={14} />
@@ -344,7 +344,7 @@ export default function ResumePage() {
         ) : (
           <p className="text-sm text-muted mb-3">No PDF uploaded yet.</p>
         )}
-        <label className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-sm cursor-pointer transition-colors">
+        <label className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-foreground/[0.08] hover:bg-foreground/20 text-sm cursor-pointer transition-colors">
           <Upload size={16} />
           {uploading ? "Uploading..." : "Upload PDF"}
           <input
@@ -382,7 +382,7 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {experiences.map((exp) => (
-            <div key={exp.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+            <div key={exp.id} className="p-3 rounded-sm bg-foreground/[0.03] border hairline space-y-2">
               <div className="flex items-start gap-3">
                 {/* Logo */}
                 <div className="relative group shrink-0">
@@ -390,14 +390,14 @@ export default function ResumePage() {
                     <img
                       src={exp.logoUrl}
                       alt={`${exp.company} logo`}
-                      className="w-10 h-10 rounded-lg object-contain bg-white/5"
+                      className="w-10 h-10 rounded-sm object-contain bg-foreground/[0.04]"
                     />
                   ) : (
-                    <div className="w-10 h-10 rounded-lg bg-white/5 flex items-center justify-center text-xs text-muted">
+                    <div className="w-10 h-10 rounded-sm bg-foreground/[0.04] flex items-center justify-center text-xs text-muted">
                       Logo
                     </div>
                   )}
-                  <label className="absolute inset-0 flex items-center justify-center rounded-lg bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
+                  <label className="absolute inset-0 flex items-center justify-center rounded-sm bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer">
                     <Upload size={14} className="text-white" />
                     <input
                       type="file"
@@ -436,7 +436,7 @@ export default function ResumePage() {
                       if (val === exp.role) return;
                       saveExperience(exp, { role: val });
                     }}
-                    className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                    className="w-full font-medium text-sm bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                   />
                   <input
                     type="text"
@@ -447,7 +447,7 @@ export default function ResumePage() {
                       if (val === exp.company) return;
                       saveExperience(exp, { company: val });
                     }}
-                    className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                    className="w-full text-xs text-muted bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                   />
                   <div className="flex gap-2">
                     <input
@@ -459,7 +459,7 @@ export default function ResumePage() {
                         if (val === (exp.location || "")) return;
                         saveExperience(exp, { location: val });
                       }}
-                      className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                      className="flex-1 text-xs bg-transparent border-b hairline focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
                     />
                     <input
                       type="url"
@@ -470,11 +470,11 @@ export default function ResumePage() {
                         if (url === (exp.companyUrl || "")) return;
                         saveExperience(exp, { companyUrl: url || null });
                       }}
-                      className="flex-1 text-xs bg-transparent border-b border-white/10 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
+                      className="flex-1 text-xs bg-transparent border-b hairline focus:border-accent/50 outline-none text-muted placeholder:text-white/20 pb-0.5"
                     />
                   </div>
                 </div>
-                <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
+                <button onClick={() => deleteExperience(exp.id)} className="p-1.5 text-muted hover:text-red-600 cursor-pointer shrink-0">
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -488,7 +488,7 @@ export default function ResumePage() {
                   saveExperience(exp, { description: val });
                 }}
                 rows={2}
-                className="w-full text-xs bg-transparent border border-white/10 rounded-lg px-2 py-1.5 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 resize-none"
+                className="w-full text-xs bg-transparent border hairline rounded-sm px-2 py-1.5 focus:border-accent/50 outline-none text-muted placeholder:text-white/20 resize-none"
               />
               {/* Dates & Current */}
               <div className="flex items-center gap-3">
@@ -503,7 +503,7 @@ export default function ResumePage() {
                       if (iso === exp.startDate) return;
                       saveExperience(exp, { startDate: iso });
                     }}
-                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
+                    className="text-xs bg-transparent border hairline rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
                   />
                 </div>
                 <div className="flex items-center gap-1">
@@ -518,7 +518,7 @@ export default function ResumePage() {
                       if (iso === exp.endDate) return;
                       saveExperience(exp, { endDate: iso });
                     }}
-                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none disabled:opacity-30"
+                    className="text-xs bg-transparent border hairline rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none disabled:opacity-30"
                   />
                 </div>
                 <label className="flex items-center gap-1 text-xs text-muted cursor-pointer">
@@ -551,7 +551,7 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {educations.map((edu) => (
-            <div key={edu.id} className="p-3 rounded-xl bg-white/[0.03] border border-white/5 space-y-2">
+            <div key={edu.id} className="p-3 rounded-sm bg-foreground/[0.03] border hairline space-y-2">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 space-y-1">
                   <input
@@ -563,7 +563,7 @@ export default function ResumePage() {
                       if (val === edu.degree) return;
                       saveEducation(edu, { degree: val });
                     }}
-                    className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                    className="w-full font-medium text-sm bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                   />
                   <input
                     type="text"
@@ -574,7 +574,7 @@ export default function ResumePage() {
                       if (val === edu.institution) return;
                       saveEducation(edu, { institution: val });
                     }}
-                    className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                    className="w-full text-xs text-muted bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                   />
                   <input
                     type="text"
@@ -585,10 +585,10 @@ export default function ResumePage() {
                       if (val === (edu.field || "")) return;
                       saveEducation(edu, { field: val });
                     }}
-                    className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                    className="w-full text-xs text-muted bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                   />
                 </div>
-                <button onClick={() => deleteEducation(edu.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
+                <button onClick={() => deleteEducation(edu.id)} className="p-1.5 text-muted hover:text-red-600 cursor-pointer shrink-0">
                   <Trash2 size={14} />
                 </button>
               </div>
@@ -604,7 +604,7 @@ export default function ResumePage() {
                       if (iso === edu.startDate) return;
                       saveEducation(edu, { startDate: iso });
                     }}
-                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
+                    className="text-xs bg-transparent border hairline rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
                   />
                 </div>
                 <div className="flex items-center gap-1">
@@ -618,7 +618,7 @@ export default function ResumePage() {
                       if (iso === edu.endDate) return;
                       saveEducation(edu, { endDate: iso });
                     }}
-                    className="text-xs bg-transparent border border-white/10 rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
+                    className="text-xs bg-transparent border hairline rounded px-1.5 py-0.5 text-muted focus:border-accent/50 outline-none"
                   />
                 </div>
               </div>
@@ -639,7 +639,7 @@ export default function ResumePage() {
         </div>
         <div className="space-y-3">
           {skills.map((skill) => (
-            <div key={skill.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/[0.03] border border-white/5">
+            <div key={skill.id} className="flex items-center gap-3 p-3 rounded-sm bg-foreground/[0.03] border hairline">
               <div className="flex-1 min-w-0 space-y-1">
                 <input
                   type="text"
@@ -650,7 +650,7 @@ export default function ResumePage() {
                     if (val === skill.name) return;
                     saveSkill(skill, { name: val });
                   }}
-                  className="w-full font-medium text-sm bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                  className="w-full font-medium text-sm bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                 />
                 <input
                   type="text"
@@ -661,10 +661,10 @@ export default function ResumePage() {
                     if (val === skill.category) return;
                     saveSkill(skill, { category: val });
                   }}
-                  className="w-full text-xs text-muted bg-transparent border-b border-white/10 focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
+                  className="w-full text-xs text-muted bg-transparent border-b hairline focus:border-accent/50 outline-none placeholder:text-white/20 pb-0.5"
                 />
               </div>
-              <button onClick={() => deleteSkill(skill.id)} className="p-1.5 text-muted hover:text-red-400 cursor-pointer shrink-0">
+              <button onClick={() => deleteSkill(skill.id)} className="p-1.5 text-muted hover:text-red-600 cursor-pointer shrink-0">
                 <Trash2 size={14} />
               </button>
             </div>

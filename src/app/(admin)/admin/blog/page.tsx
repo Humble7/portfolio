@@ -58,7 +58,7 @@ export default function BlogPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold">Blog Posts</h1>
+          <h1 className="font-serif text-4xl">Blog Posts</h1>
           <Toggle label="Show Blog" initial={showBlogInitial} settingKey="showBlog" />
           <Toggle label="Timestamps" initial={timestampInitial} settingKey="showBlogTimestamp" />
         </div>

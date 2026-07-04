@@ -16,7 +16,6 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 const navItems = [
@@ -32,13 +31,14 @@ const navItems = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const router = useRouter();
   const [open, setOpen] = useState(false);
 
-  // Close sidebar on route change
-  useEffect(() => {
+  // Close sidebar on route change — state derived during render instead of in an effect
+  const [prevPathname, setPrevPathname] = useState(pathname);
+  if (prevPathname !== pathname) {
+    setPrevPathname(pathname);
     setOpen(false);
-  }, [pathname]);
+  }
 
   // Prevent body scroll when sidebar is open on mobile
   useEffect(() => {
@@ -48,13 +48,18 @@ export function AdminSidebar() {
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/admin/login");
+    // Full navigation clears the client router cache, which still holds
+    // authenticated /admin pages after the cookie is gone
+    window.location.href = "/admin/login";
   };
+
+  // The login page renders inside this layout too — no sidebar there
+  if (pathname === "/admin/login") return null;
 
   const sidebarContent = (
     <>
-      <div className="p-6 border-b border-white/5 flex items-center justify-between">
-        <Link href="/admin" className="text-lg font-bold tracking-tight">
+      <div className="p-6 border-b hairline flex items-center justify-between">
+        <Link href="/admin" className="font-serif text-xl tracking-tight">
           Admin
         </Link>
         <button
@@ -77,10 +82,10 @@ export function AdminSidebar() {
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-colors",
+                "flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm transition-colors",
                 isActive
                   ? "bg-accent/10 text-accent"
-                  : "text-muted hover:text-foreground hover:bg-white/5"
+                  : "text-muted hover:text-foreground hover:bg-foreground/[0.04]"
               )}
             >
               <Icon size={18} />
@@ -90,10 +95,10 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      <div className="p-4 border-t border-white/5">
+      <div className="p-4 border-t hairline">
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-muted hover:text-red-400 hover:bg-red-500/5 transition-colors w-full cursor-pointer"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-sm text-sm text-muted hover:text-red-600 hover:bg-red-500/5 transition-colors w-full cursor-pointer"
         >
           <LogOut size={18} />
           Logout
@@ -105,7 +110,7 @@ export function AdminSidebar() {
   return (
     <>
       {/* Mobile top bar */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 border-b border-white/5 bg-black/80 backdrop-blur-sm flex items-center px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 h-14 border-b hairline glass-strong border-x-0 border-t-0 flex items-center px-4">
         <button
           onClick={() => setOpen(true)}
           className="p-1.5 text-muted hover:text-foreground cursor-pointer"
@@ -118,7 +123,7 @@ export function AdminSidebar() {
       {/* Mobile overlay */}
       {open && (
         <div
-          className="lg:hidden fixed inset-0 z-40 bg-black/60"
+          className="lg:hidden fixed inset-0 z-40 bg-black/30"
           onClick={() => setOpen(false)}
         />
       )}
@@ -126,7 +131,7 @@ export function AdminSidebar() {
       {/* Mobile slide-out sidebar */}
       <aside
         className={cn(
-          "lg:hidden fixed top-0 left-0 z-50 w-64 h-full bg-background border-r border-white/5 flex flex-col transition-transform duration-200",
+          "lg:hidden fixed top-0 left-0 z-50 w-64 h-full bg-background border-r hairline flex flex-col transition-transform duration-200",
           open ? "translate-x-0" : "-translate-x-full"
         )}
       >
@@ -134,7 +139,7 @@ export function AdminSidebar() {
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className="hidden lg:flex w-64 min-h-screen border-r border-white/5 bg-black/50 flex-col">
+      <aside className="hidden lg:flex w-64 min-h-screen border-r hairline bg-glass-bg flex-col">
         {sidebarContent}
       </aside>
     </>

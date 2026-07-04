@@ -114,7 +114,7 @@ export default function ContentPage() {
   }
 
   const inputClass =
-    "w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-sm text-foreground focus:outline-none focus:border-accent/50";
+    "w-full bg-foreground/[0.04] border hairline rounded-sm px-3 py-2 text-sm text-foreground focus:outline-none focus:border-accent/50";
 
   const hasAnyValues = Object.values(values).some((v) => v);
 
@@ -122,7 +122,7 @@ export default function ContentPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Site Content</h1>
+          <h1 className="font-serif text-3xl">Site Content</h1>
           <p className="text-sm text-muted mt-1">
             Edit homepage section text. Changes take effect within 60 seconds.
           </p>
@@ -131,7 +131,7 @@ export default function ContentPage() {
           <button
             onClick={seedDefaults}
             disabled={seeding}
-            className="px-4 py-2 text-sm bg-accent/10 text-accent hover:bg-accent/20 rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+            className="px-4 py-2 text-sm bg-accent/10 text-accent hover:bg-accent/20 rounded-sm transition-colors cursor-pointer disabled:opacity-50"
           >
             {seeding ? "Seeding..." : "Load Defaults"}
           </button>

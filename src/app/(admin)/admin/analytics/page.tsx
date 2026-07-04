@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSetting } from "@/lib/settings";
 import { Card, Toggle } from "@/components/ui";
-import { Eye, Globe, FileText, TrendingUp, Clock } from "lucide-react";
+import { Eye, Globe, TrendingUp, Clock } from "lucide-react";
 import { AnalyticsFilters } from "./AnalyticsFilters";
 import { RecentVisits } from "./RecentVisits";
 import { SimpleBarChart } from "@/components/admin/SimpleBarChart";
@@ -21,14 +21,19 @@ export default async function AnalyticsPage({
 }) {
   const params = await searchParams;
 
-  // Default: last 30 days
-  const now = new Date();
-  const defaultFrom = new Date(now);
+  // Default: last 30 days. Invalid date params fall back to defaults instead of crashing Prisma.
+  const parseDate = (s: string | undefined): Date | null => {
+    if (!s) return null;
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  };
+
+  const defaultFrom = new Date();
   defaultFrom.setDate(defaultFrom.getDate() - 30);
   defaultFrom.setUTCHours(0, 0, 0, 0);
 
-  const from = params.from ? new Date(params.from) : defaultFrom;
-  const to = params.to ? new Date(params.to) : now;
+  const from = parseDate(params.from) ?? defaultFrom;
+  const to = parseDate(params.to) ?? new Date();
   to.setUTCHours(23, 59, 59, 999);
 
   const countryFilter = params.country || undefined;
@@ -83,7 +88,6 @@ export default async function AnalyticsPage({
 
   // Aggregate stats
   const totalViews = pageViews.reduce((sum, pv) => sum + pv.count, 0);
-  const uniquePages = new Set(pageViews.map((pv) => pv.path)).size;
   const uniqueCountries = new Set(pageViews.map((pv) => pv.country)).size;
 
   // Today's views
@@ -137,7 +141,7 @@ export default async function AnalyticsPage({
     <div>
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold">Analytics</h1>
+          <h1 className="font-serif text-4xl">Analytics</h1>
           <Toggle label="Detailed tracking" initial={trackVisitsEnabled} settingKey="trackVisits" />
         </div>
         <AnalyticsFilters
@@ -154,7 +158,7 @@ export default async function AnalyticsPage({
           const Icon = stat.icon;
           return (
             <Card key={stat.label} className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center shrink-0">
+              <div className="w-12 h-12 rounded-sm bg-accent/10 flex items-center justify-center shrink-0">
                 <Icon size={22} className="text-accent" />
               </div>
               <div>
@@ -183,7 +187,7 @@ export default async function AnalyticsPage({
               {topPages.map(([path, count]) => (
                 <div
                   key={path}
-                  className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
+                  className="flex items-center justify-between py-2 border-b hairline last:border-0"
                 >
                   <span className="text-sm truncate mr-4">{path}</span>
                   <span className="text-sm font-medium text-muted shrink-0">
@@ -204,7 +208,7 @@ export default async function AnalyticsPage({
               {topCountries.map(([country, count]) => (
                 <div
                   key={country}
-                  className="flex items-center justify-between py-2 border-b border-white/5 last:border-0"
+                  className="flex items-center justify-between py-2 border-b hairline last:border-0"
                 >
                   <span className="text-sm">{country}</span>
                   <span className="text-sm font-medium text-muted">

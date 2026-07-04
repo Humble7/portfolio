@@ -14,6 +14,7 @@ export default function EditBlogPostPage({
   const { id } = use(params);
   const router = useRouter();
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState("");
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [form, setForm] = useState({
@@ -70,6 +71,7 @@ export default function EditBlogPostPage({
 
       const data = await res.json();
       if (data.success) router.push("/admin/blog");
+      else setSaveError(data.error || "Save failed");
     } finally {
       setSaving(false);
     }
@@ -94,8 +96,8 @@ export default function EditBlogPostPage({
       </button>
 
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Edit Post</h1>
-        <Button variant="ghost" onClick={handleDelete} className="text-red-400 hover:text-red-300">
+        <h1 className="font-serif text-4xl">Edit Post</h1>
+        <Button variant="ghost" onClick={handleDelete} className="text-red-600 hover:text-red-700">
           <Trash2 size={16} className="mr-2" />
           Delete
         </Button>
@@ -148,7 +150,7 @@ export default function EditBlogPostPage({
             <select
               value={form.category}
               onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full rounded-sm bg-foreground/[0.04] border hairline px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
             >
               {categories.map((cat) => (
                 <option key={cat.id} value={cat.name}>{cat.name}</option>
@@ -160,7 +162,7 @@ export default function EditBlogPostPage({
             <select
               value={form.status}
               onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
+              className="w-full rounded-sm bg-foreground/[0.04] border hairline px-4 py-3 text-foreground focus:outline-none focus:ring-2 focus:ring-accent/50"
             >
               <option value="DRAFT">Draft</option>
               <option value="PUBLISHED">Published</option>
@@ -168,6 +170,10 @@ export default function EditBlogPostPage({
             </select>
           </div>
         </div>
+
+        {saveError && (
+          <p className="text-sm text-red-600">{saveError}</p>
+        )}
 
         <div className="flex gap-4">
           <Button type="submit" disabled={saving}>

@@ -60,12 +60,12 @@ export function AnalyticsFilters({
   const activeRange = getActiveRange(currentFrom, currentTo);
 
   const btnBase =
-    "px-3 py-1.5 text-sm rounded-lg border transition-colors cursor-pointer";
+    "px-3 py-1.5 text-sm rounded-sm border transition-colors cursor-pointer";
   const btnActive = "bg-accent/15 border-accent/50 text-accent";
   const btnInactive =
-    "bg-white/5 border-white/10 text-muted hover:text-foreground hover:border-white/20";
+    "bg-foreground/[0.04] hairline text-muted hover:text-foreground hover:border-foreground/25";
   const inputClass =
-    "bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent/50";
+    "bg-foreground/[0.04] border hairline rounded-sm px-3 py-1.5 text-sm text-foreground focus:outline-none focus:border-accent/50";
 
   return (
     <div className="flex flex-wrap items-center gap-2">

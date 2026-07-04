@@ -47,12 +47,12 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
   return (
     <div className={className}>
       {value ? (
-        <div className="relative rounded-xl overflow-hidden group">
+        <div className="relative rounded-sm overflow-hidden group">
           <img src={value} alt="Upload" className="w-full h-48 object-cover" />
           <button
             type="button"
             onClick={() => onChange("")}
-            className="absolute top-2 right-2 p-1.5 rounded-lg bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+            className="absolute top-2 right-2 p-1.5 rounded-sm bg-black/60 text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
           >
             <X size={16} />
           </button>
@@ -67,10 +67,10 @@ export function ImageUploader({ value, onChange, className }: ImageUploaderProps
           onDragLeave={() => setDragActive(false)}
           onDrop={handleDrop}
           className={cn(
-            "flex flex-col items-center justify-center gap-2 p-8 rounded-xl border-2 border-dashed transition-colors cursor-pointer",
+            "flex flex-col items-center justify-center gap-2 p-8 rounded-sm border-2 border-dashed transition-colors cursor-pointer",
             dragActive
               ? "border-accent bg-accent/5"
-              : "border-white/10 hover:border-white/20"
+              : "hairline hover:border-foreground/25"
           )}
         >
           <Upload size={24} className="text-muted" />

@@ -18,23 +18,19 @@ export default function AdminMessagesPage() {
   const [selected, setSelected] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchMessages();
-  }, []);
-
-  const fetchMessages = async () => {
-    try {
-      const res = await fetch("/api/messages");
-      if (!res.ok) {
-        setLoading(false);
-        return;
+    (async () => {
+      try {
+        const res = await fetch("/api/messages");
+        if (res.ok) {
+          const json = await res.json();
+          if (json.success) setMessages(json.data);
+        }
+      } catch {
+        // ignore fetch errors
       }
-      const json = await res.json();
-      if (json.success) setMessages(json.data);
-    } catch {
-      // ignore fetch errors
-    }
-    setLoading(false);
-  };
+      setLoading(false);
+    })();
+  }, []);
 
   const toggleRead = async (msg: Message) => {
     const res = await fetch(`/api/messages/${msg.id}`, {
@@ -87,7 +83,7 @@ export default function AdminMessagesPage() {
     <div>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold">Messages</h1>
+          <h1 className="font-serif text-3xl">Messages</h1>
           <p className="text-sm text-muted mt-1">
             {messages.length} total{unreadCount > 0 && ` · ${unreadCount} unread`}
           </p>
@@ -105,7 +101,7 @@ export default function AdminMessagesPage() {
                   setMessages((prev) => prev.filter((m) => !m.read));
                   if (selected && readIds.includes(selected)) setSelected(null);
                 }}
-                className="px-3 py-1.5 text-sm bg-white/5 text-muted hover:text-foreground hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                className="px-3 py-1.5 text-sm bg-foreground/[0.04] text-muted hover:text-foreground hover:bg-foreground/[0.08] rounded-sm transition-colors cursor-pointer"
               >
                 Delete Read
               </button>
@@ -119,7 +115,7 @@ export default function AdminMessagesPage() {
                 setMessages([]);
                 setSelected(null);
               }}
-              className="px-3 py-1.5 text-sm bg-red-500/20 text-red-400 hover:bg-red-500/30 rounded-lg transition-colors cursor-pointer"
+              className="px-3 py-1.5 text-sm bg-red-600/10 text-red-600 hover:bg-red-600/20 rounded-sm transition-colors cursor-pointer"
             >
               Delete All
             </button>
@@ -140,11 +136,11 @@ export default function AdminMessagesPage() {
             {messages.map((msg) => (
               <div
                 key={msg.id}
-                className={`group relative w-full text-left p-4 rounded-xl transition-colors cursor-pointer ${
+                className={`group relative w-full text-left p-4 rounded-sm transition-colors cursor-pointer ${
                   selected === msg.id
                     ? "bg-accent/10 border border-accent/20"
-                    : "hover:bg-white/5 border border-transparent"
-                } ${!msg.read ? "bg-white/[0.03]" : ""}`}
+                    : "hover:bg-foreground/[0.04] border border-transparent"
+                } ${!msg.read ? "bg-foreground/[0.03]" : ""}`}
                 onClick={() => {
                   setSelected(msg.id);
                   if (!msg.read) toggleRead(msg);
@@ -173,7 +169,7 @@ export default function AdminMessagesPage() {
                         e.stopPropagation();
                         deleteMessage(msg.id);
                       }}
-                      className="p-1 rounded-lg opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-muted hover:text-red-400 transition-all cursor-pointer"
+                      className="p-1 rounded-sm opacity-0 group-hover:opacity-100 hover:bg-red-500/10 text-muted hover:text-red-600 transition-all cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 size={14} />
@@ -187,7 +183,7 @@ export default function AdminMessagesPage() {
           {/* Message detail */}
           <div className="lg:col-span-3">
             {selectedMsg ? (
-              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-6">
+              <div className="rounded-sm border hairline bg-foreground/[0.02] p-6">
                 <div className="flex items-start justify-between mb-6">
                   <div>
                     <h3 className="text-lg font-semibold">{selectedMsg.name}</h3>
@@ -204,14 +200,14 @@ export default function AdminMessagesPage() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => toggleRead(selectedMsg)}
-                      className="p-2 rounded-lg hover:bg-white/10 text-muted hover:text-foreground transition-colors cursor-pointer"
+                      className="p-2 rounded-sm hover:bg-foreground/[0.08] text-muted hover:text-foreground transition-colors cursor-pointer"
                       title={selectedMsg.read ? "Mark as unread" : "Mark as read"}
                     >
                       {selectedMsg.read ? <MailOpen size={18} /> : <Mail size={18} />}
                     </button>
                     <button
                       onClick={() => deleteMessage(selectedMsg.id)}
-                      className="p-2 rounded-lg hover:bg-red-500/10 text-muted hover:text-red-400 transition-colors cursor-pointer"
+                      className="p-2 rounded-sm hover:bg-red-500/10 text-muted hover:text-red-600 transition-colors cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 size={18} />
@@ -221,10 +217,10 @@ export default function AdminMessagesPage() {
                 <div className="whitespace-pre-wrap text-sm leading-relaxed text-muted">
                   {selectedMsg.message}
                 </div>
-                <div className="mt-6 pt-4 border-t border-white/5">
+                <div className="mt-6 pt-4 border-t hairline">
                   <a
                     href={`mailto:${selectedMsg.email}?subject=Re: Message from your portfolio`}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-accent/10 text-accent hover:bg-accent/20 transition-colors text-sm"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-sm bg-accent/10 text-accent hover:bg-accent/20 transition-colors text-sm"
                   >
                     <Mail size={14} />
                     Reply via Email

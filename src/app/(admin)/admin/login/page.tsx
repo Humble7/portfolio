@@ -1,11 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Button, Input, GlassPanel } from "@/components/ui";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -27,13 +25,16 @@ export default function LoginPage() {
 
       if (!data.success) {
         setError(data.error || "Login failed");
+        setLoading(false);
         return;
       }
 
-      router.push("/admin");
+      // Full navigation instead of router.push: the client router cache still
+      // holds the pre-login middleware redirect (/admin -> /admin/login), so a
+      // client-side transition would bounce straight back to the login page.
+      window.location.href = "/admin";
     } catch {
       setError("Something went wrong");
-    } finally {
       setLoading(false);
     }
   };
@@ -48,7 +49,7 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-xl px-4 py-3 text-sm text-red-400">
+            <div className="bg-red-500/10 border border-red-500/20 rounded-sm px-4 py-3 text-sm text-red-600">
               {error}
             </div>
           )}
