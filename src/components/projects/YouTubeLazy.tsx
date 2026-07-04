@@ -35,10 +35,10 @@ export function YouTubeLazy({ url, className }: YouTubeLazyProps) {
   return (
     <div
       ref={ref}
-      className={`relative aspect-video rounded-2xl overflow-hidden bg-white/5 ${className || ""}`}
+      className={`relative aspect-video rounded-sm overflow-hidden bg-foreground/[0.04] ${className || ""}`}
     >
       {!visible ? (
-        <div className="absolute inset-0 bg-white/5" />
+        <div className="absolute inset-0 bg-foreground/[0.04]" />
       ) : loaded ? (
         <iframe
           src={`https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1`}
@@ -57,6 +57,19 @@ export function YouTubeLazy({ url, className }: YouTubeLazyProps) {
             alt="Video thumbnail"
             className="absolute inset-0 w-full h-full object-cover"
             loading="lazy"
+            onLoad={(e) => {
+              // Missing maxresdefault returns a 120x90 gray placeholder; fall back to hqdefault
+              const img = e.currentTarget;
+              if (img.naturalWidth <= 120 && !img.src.includes("hqdefault")) {
+                img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+              }
+            }}
+            onError={(e) => {
+              const img = e.currentTarget;
+              if (!img.src.includes("hqdefault")) {
+                img.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+              }
+            }}
           />
           <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
           <div className="relative w-16 h-16 rounded-full bg-accent/90 flex items-center justify-center group-hover:scale-110 transition-transform">

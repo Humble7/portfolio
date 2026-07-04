@@ -7,6 +7,23 @@ export function PageTracker() {
   const pathname = usePathname();
   const visitRef = useRef<{ id: string; start: number } | null>(null);
 
+  function sendDuration() {
+    const visit = visitRef.current;
+    if (!visit) return;
+
+    const duration = Math.round((Date.now() - visit.start) / 1000);
+    visitRef.current = null;
+    if (duration < 1) return;
+
+    // sendBeacon is reliable even when the page is closing
+    navigator.sendBeacon(
+      "/api/analytics/track",
+      new Blob([JSON.stringify({ visitId: visit.id, duration })], {
+        type: "application/json",
+      })
+    );
+  }
+
   useEffect(() => {
     if (pathname.startsWith("/admin") || pathname.startsWith("/api")) return;
 
@@ -35,25 +52,7 @@ export function PageTracker() {
     };
     document.addEventListener("visibilitychange", onHide);
     return () => document.removeEventListener("visibilitychange", onHide);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
-
-  function sendDuration() {
-    const visit = visitRef.current;
-    if (!visit) return;
-
-    const duration = Math.round((Date.now() - visit.start) / 1000);
-    visitRef.current = null;
-    if (duration < 1) return;
-
-    // sendBeacon is reliable even when the page is closing
-    navigator.sendBeacon(
-      "/api/analytics/track",
-      new Blob([JSON.stringify({ visitId: visit.id, duration })], {
-        type: "application/json",
-      })
-    );
-  }
 
   return null;
 }

@@ -1,11 +1,26 @@
 import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { signToken, verifyPassword, getAuthCookieConfig } from "@/lib/auth";
 import { loginSchema } from "@/validators/auth";
+import { rateLimit } from "@/lib/rate-limit";
 
 export async function POST(request: Request) {
   try {
+    // Throttle brute-force attempts: 10 tries per 15 minutes per IP
+    const hdrs = await headers();
+    const ip =
+      hdrs.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+      hdrs.get("x-real-ip") ||
+      "unknown";
+    const { allowed } = rateLimit(`login:${ip}`, 10, 15 * 60_000);
+    if (!allowed) {
+      return NextResponse.json(
+        { success: false, error: "Too many login attempts. Please try again later." },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
 

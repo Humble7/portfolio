@@ -6,16 +6,11 @@ export const dynamic = "force-dynamic";
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [posts, projects] = await Promise.all([
-    prisma.blogPost.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
-    }),
-    prisma.project.findMany({
-      where: { status: "PUBLISHED" },
-      select: { slug: true, updatedAt: true },
-    }),
-  ]);
+  // Projects have no per-slug pages, so only blog posts get dynamic routes
+  const posts = await prisma.blogPost.findMany({
+    where: { status: "PUBLISHED" },
+    select: { slug: true, updatedAt: true },
+  });
 
   const staticRoutes: MetadataRoute.Sitemap = [
     { url: SITE_URL, lastModified: new Date(), changeFrequency: "monthly", priority: 1 },

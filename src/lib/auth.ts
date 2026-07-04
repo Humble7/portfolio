@@ -2,8 +2,12 @@ import { SignJWT, jwtVerify } from "jose";
 import { hash, compare } from "bcryptjs";
 import { cookies } from "next/headers";
 
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === "production") {
+  throw new Error("JWT_SECRET must be set in production");
+}
+
 const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "fallback-secret-change-me"
+  process.env.JWT_SECRET || "dev-only-secret"
 );
 
 const COOKIE_NAME = "auth-token";

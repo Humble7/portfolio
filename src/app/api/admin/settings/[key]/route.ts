@@ -3,11 +3,22 @@ import { verifyAuth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { clearCache } from "@/lib/api-cache";
 
+// Settings safe to expose without auth; everything else requires an admin session
+const PUBLIC_KEYS = new Set(["showBlog"]);
+
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ key: string }> }
 ) {
   const { key } = await params;
+
+  if (!PUBLIC_KEYS.has(key)) {
+    const auth = await verifyAuth();
+    if (!auth) {
+      return NextResponse.json({ success: false }, { status: 401 });
+    }
+  }
+
   const row = await prisma.siteSetting.findUnique({ where: { key } });
 
   return NextResponse.json({
