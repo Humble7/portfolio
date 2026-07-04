@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { GlassPanel, Button, Input, Textarea } from "@/components/ui";
 import { FadeInOnScroll } from "@/components/scroll";
-import { Send, Github, Linkedin, Mail, Check, AlertCircle, Copy } from "lucide-react";
+import { Send, Github, Linkedin, Mail, Check, AlertCircle } from "lucide-react";
 import { useSiteContent, useContent } from "@/lib/site-content";
 
 /** Parse "text {gradient} more text" into mixed elements */
@@ -13,7 +13,7 @@ function GradientText({ text }: { text: string }) {
     <>
       {parts.map((part, i) =>
         part.startsWith("{") && part.endsWith("}") ? (
-          <span key={i} className="text-gradient">{part.slice(1, -1)}</span>
+          <span key={i} className="italic text-accent">{part.slice(1, -1)}</span>
         ) : (
           <span key={i}>{part}</span>
         )
@@ -98,17 +98,15 @@ export function ActContact() {
     <section className="min-h-screen py-32 px-6" id="contact">
       <div className="max-w-4xl mx-auto">
         <FadeInOnScroll>
-          <p className="text-accent text-sm uppercase tracking-widest mb-4 text-center">
-            {label}
-          </p>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold text-center mb-16">
+          <p className="kicker mb-6 text-center">06 — {label}</p>
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl text-center mb-16">
             <GradientText text={heading} />
           </h2>
         </FadeInOnScroll>
 
         <div className="grid md:grid-cols-2 gap-8">
           <FadeInOnScroll direction="left" delay={0.1}>
-            <GlassPanel hover3d className="h-full p-8">
+            <GlassPanel className="h-full p-8">
               <h3 className="text-xl font-semibold mb-6">Send a Message</h3>
               <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Honeypot field — hidden from real users, bots fill it */}
@@ -192,7 +190,7 @@ export function ActContact() {
           </FadeInOnScroll>
 
           <FadeInOnScroll direction="right" delay={0.2}>
-            <GlassPanel hover3d className="h-full p-8 flex flex-col justify-between">
+            <GlassPanel className="h-full p-8 flex flex-col justify-between">
               <div>
                 <h3 className="text-xl font-semibold mb-6">Connect</h3>
                 <p className="text-muted leading-relaxed mb-8">
@@ -208,7 +206,7 @@ export function ActContact() {
                       setEmailCopied(true);
                       setTimeout(() => setEmailCopied(false), 2000);
                     }}
-                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group w-full text-left cursor-pointer"
+                    className="flex items-center gap-4 p-4 rounded-sm hover:bg-foreground/[0.04] transition-colors group w-full text-left cursor-pointer"
                   >
                     <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                       {emailCopied ? (
@@ -231,7 +229,7 @@ export function ActContact() {
                     href={githubUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
+                    className="flex items-center gap-4 p-4 rounded-sm hover:bg-foreground/[0.04] transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                       <Github size={18} className="text-accent" />
@@ -248,7 +246,7 @@ export function ActContact() {
                     href={linkedinUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-4 p-4 rounded-xl hover:bg-white/5 transition-colors group"
+                    className="flex items-center gap-4 p-4 rounded-sm hover:bg-foreground/[0.04] transition-colors group"
                   >
                     <div className="w-10 h-10 rounded-full bg-accent/10 flex items-center justify-center group-hover:bg-accent/20 transition-colors">
                       <Linkedin size={18} className="text-accent" />

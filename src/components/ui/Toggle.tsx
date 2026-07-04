@@ -35,7 +35,7 @@ export function Toggle({ label, initial, settingKey }: ToggleProps) {
     >
       <div
         className={`relative w-9 h-5 rounded-full transition-colors ${
-          enabled ? "bg-accent" : "bg-white/15"
+          enabled ? "bg-accent" : "bg-foreground/20"
         }`}
       >
         <div

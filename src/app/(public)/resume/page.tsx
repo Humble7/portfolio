@@ -44,10 +44,10 @@ export default async function ResumePage() {
                 <img
                   src={profile.avatarUrl}
                   alt={profile.name}
-                  className="w-24 h-24 rounded-full object-cover border-2 border-white/10 mb-6"
+                  className="w-24 h-24 rounded-full object-cover border hairline mb-6"
                 />
               )}
-              <h1 className="text-5xl md:text-6xl font-bold mb-2">{profile.name}</h1>
+              <h1 className="font-serif text-5xl md:text-6xl mb-2">{profile.name}</h1>
               <p className="text-xl text-accent mb-4">{profile.title}</p>
               <p className="text-muted leading-relaxed max-w-2xl mb-4">{profile.bio}</p>
               <div className="flex flex-wrap gap-4 text-sm text-muted">

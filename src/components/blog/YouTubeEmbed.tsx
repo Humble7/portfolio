@@ -38,7 +38,7 @@ export function YouTubeEmbed({ url, className }: YouTubeEmbedProps) {
   return (
     <div
       ref={ref}
-      className={`relative aspect-video rounded-2xl overflow-hidden bg-white/5 ${className || ""}`}
+      className={`relative aspect-video rounded-sm overflow-hidden bg-foreground/[0.04] ${className || ""}`}
     >
       {loaded ? (
         <iframe

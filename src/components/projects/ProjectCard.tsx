@@ -19,7 +19,7 @@ export function ProjectCard({
   liveUrl,
 }: ProjectCardProps) {
   return (
-    <article className="glass rounded-2xl overflow-hidden transition-all duration-300 hover:bg-white/8">
+    <article className="glass rounded-sm overflow-hidden transition-colors duration-200 hover:border-accent/50">
       {coverImage && (
         <div className="aspect-video overflow-hidden">
           <img

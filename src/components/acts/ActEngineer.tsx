@@ -39,12 +39,10 @@ export function ActEngineer() {
     <ScrollAct className="py-32 px-6" id="engineer">
       <div className="max-w-4xl mx-auto">
         <FadeInOnScroll>
-          <p className="text-accent text-sm uppercase tracking-widest mb-4">
-            {label}
-          </p>
+          <p className="kicker mb-6">02 — {label}</p>
         </FadeInOnScroll>
 
-        <TextReveal className="text-4xl sm:text-5xl md:text-6xl font-bold leading-tight mb-32">
+        <TextReveal className="font-serif text-4xl sm:text-5xl md:text-6xl leading-tight mb-32">
           {heading}
         </TextReveal>
 
@@ -52,7 +50,7 @@ export function ActEngineer() {
         <div className="relative">
           {/* Timeline line */}
           <ParallaxLayer speed={0.2} className="absolute left-[19px] md:left-1/2 top-0 bottom-0 w-px">
-            <div className="h-full bg-gradient-to-b from-transparent via-accent/30 to-transparent" />
+            <div className="h-full bg-gradient-to-b from-transparent via-foreground/20 to-transparent" />
           </ParallaxLayer>
 
           <div className="space-y-24 md:space-y-32">
@@ -71,7 +69,7 @@ export function ActEngineer() {
                   >
                     {/* Dot or Logo */}
                     {item.logoUrl ? (
-                      <div className="absolute left-[4px] md:left-1/2 md:-translate-x-1/2 w-[30px] h-[30px] rounded-full bg-black border-2 border-accent z-10 overflow-hidden flex items-center justify-center">
+                      <div className="absolute left-[4px] md:left-1/2 md:-translate-x-1/2 w-[30px] h-[30px] rounded-full bg-background border border-foreground/30 z-10 overflow-hidden flex items-center justify-center">
                         <img
                           src={item.logoUrl}
                           alt={`${item.company} logo`}
@@ -79,7 +77,7 @@ export function ActEngineer() {
                         />
                       </div>
                     ) : (
-                      <div className="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-[15px] h-[15px] rounded-full bg-accent/50 border-2 border-accent z-10" />
+                      <div className="absolute left-[12px] md:left-1/2 md:-translate-x-1/2 w-[13px] h-[13px] rounded-full bg-background border-2 border-accent z-10" />
                     )}
 
                     {/* Content */}
@@ -88,25 +86,29 @@ export function ActEngineer() {
                         i % 2 === 0 ? "md:text-right md:pr-16" : "md:pl-16"
                       }`}
                     >
-                      <span className="text-accent font-mono text-sm">
+                      <span className="font-mono text-xs tracking-[0.18em] text-accent">
                         {year}
                       </span>
-                      <h3 className="text-2xl font-bold mt-1 mb-1">
+                      <h3 className="font-serif text-3xl mt-2 mb-1">
                         {item.companyUrl ? (
                           <a
                             href={item.companyUrl}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-accent hover:text-accent-hover transition-colors underline decoration-accent/60 underline-offset-4 hover:decoration-accent"
+                            className="hover:text-accent transition-colors underline decoration-border underline-offset-4 hover:decoration-accent"
                           >
                             {item.company}
                           </a>
                         ) : (
                           item.company
                         )}
-                        {item.location && ` — ${item.location}`}
+                        {item.location && (
+                          <span className="text-muted text-xl"> — {item.location}</span>
+                        )}
                       </h3>
-                      <p className="text-sm text-accent/70 mb-3">{item.role}</p>
+                      <p className="font-mono text-xs uppercase tracking-[0.18em] text-muted mb-3">
+                        {item.role}
+                      </p>
                       <p className="text-muted leading-relaxed">
                         {item.description}
                       </p>

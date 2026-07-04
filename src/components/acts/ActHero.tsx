@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import { motion, useScroll, useTransform, useReducedMotion } from "motion/react";
-import { ChevronDown } from "lucide-react";
+import { ArrowDown } from "lucide-react";
 import { useContent } from "@/lib/site-content";
 
 export function ActHero() {
@@ -13,10 +13,8 @@ export function ActHero() {
     offset: ["start start", "end start"],
   });
 
-  const overlayOpacity = useTransform(scrollYProgress, [0, 1], [0, 0.6]);
-  const headlineScale = useTransform(scrollYProgress, [0, 1], [1, 0.95]);
-  const subtitleOpacity = useTransform(scrollYProgress, [0.1, 0.4], [0, 1]);
-  const indicatorOpacity = useTransform(scrollYProgress, [0, 0.3], [1, 0]);
+  const contentOpacity = useTransform(scrollYProgress, [0.4, 0.9], [1, 0]);
+  const contentY = useTransform(scrollYProgress, [0, 1], [0, -60]);
 
   const title1 = useContent("hero.title1", "Crafting Native");
   const title2 = useContent("hero.title2", "Experiences");
@@ -25,54 +23,80 @@ export function ActHero() {
     "Senior iOS Engineer. 5+ years at DiDi, Shopee, Mozat & more.\nBuilding high-performance, user-centric mobile apps."
   );
 
+  const enter = (delay: number) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 20 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.7, delay, ease: [0.25, 0.46, 0.45, 0.94] as const },
+        };
+
   return (
-    <section ref={ref} className="relative h-[140vh]">
-      <div className="sticky top-0 h-screen flex flex-col items-center justify-center overflow-hidden">
-        {/* Gradient background */}
-        <motion.div
-          className="absolute inset-0 bg-gradient-to-b from-black via-[#0a0a2e] to-black"
-          style={prefersReducedMotion ? {} : { opacity: useTransform(scrollYProgress, [0, 0.5], [0.3, 1]) }}
-        />
+    <section ref={ref} className="relative min-h-screen flex flex-col">
+      <motion.div
+        className="flex-1 flex flex-col justify-center max-w-7xl mx-auto w-full px-6 pt-16"
+        style={prefersReducedMotion ? {} : { opacity: contentOpacity, y: contentY }}
+      >
+        {/* Kicker */}
+        <motion.p {...enter(0)} className="kicker mb-8">
+          01 — Senior iOS Engineer
+        </motion.p>
 
-        {/* Overlay */}
-        <motion.div
-          className="absolute inset-0 bg-black"
-          style={prefersReducedMotion ? {} : { opacity: overlayOpacity }}
-        />
-
-        {/* Content */}
-        <motion.div
-          className="relative z-10 text-center px-6 max-w-5xl mx-auto"
-          style={prefersReducedMotion ? {} : { scale: headlineScale }}
+        {/* Headline */}
+        <motion.h1
+          {...enter(0.1)}
+          className="font-serif text-6xl sm:text-7xl md:text-[7.5rem] leading-[1.02] tracking-tight mb-10 max-w-5xl"
         >
-          <h1 className="text-5xl sm:text-7xl md:text-[6rem] font-bold leading-[1.15] tracking-tight mb-8">
-            <span className="text-gradient">{title1}</span>
-            <br />
-            <span className="text-foreground">{title2}</span>
-          </h1>
+          {title1}
+          <br />
+          <span className="italic text-accent">{title2}</span>
+          <span className="text-accent">.</span>
+        </motion.h1>
 
-          <motion.p
-            className="text-lg sm:text-xl md:text-2xl text-muted max-w-2xl mx-auto whitespace-pre-line"
-            style={prefersReducedMotion ? {} : { opacity: subtitleOpacity }}
-          >
-            {subtitle}
-          </motion.p>
-        </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          className="absolute bottom-12 flex flex-col items-center gap-2"
-          style={prefersReducedMotion ? {} : { opacity: indicatorOpacity }}
+        {/* Subtitle */}
+        <motion.p
+          {...enter(0.25)}
+          className="text-lg md:text-xl text-muted max-w-xl whitespace-pre-line leading-relaxed"
         >
-          <span className="text-xs text-muted uppercase tracking-widest">Scroll</span>
-          <motion.div
-            animate={{ y: [0, 8, 0] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+          {subtitle}
+        </motion.p>
+
+        {/* CTAs */}
+        <motion.div {...enter(0.4)} className="mt-12 flex items-center gap-8">
+          <a
+            href="#projects"
+            className="inline-flex items-center gap-2 bg-foreground text-background px-6 py-3 rounded-sm font-medium hover:bg-accent hover:text-white transition-colors"
           >
-            <ChevronDown size={20} className="text-muted" />
-          </motion.div>
+            View Work
+            <ArrowDown size={16} />
+          </a>
+          <a
+            href="#contact"
+            className="font-mono text-xs uppercase tracking-[0.18em] text-foreground underline decoration-border underline-offset-8 hover:text-accent hover:decoration-accent transition-colors"
+          >
+            Get in Touch
+          </a>
         </motion.div>
-      </div>
+      </motion.div>
+
+      {/* Bottom rule with index marks, magazine-footer style */}
+      <motion.div {...enter(0.55)} className="max-w-7xl mx-auto w-full px-6 pb-10">
+        <div className="border-t hairline pt-4 flex items-center justify-between font-mono text-[0.7rem] uppercase tracking-[0.18em] text-muted">
+          <span>Portfolio — {new Date().getFullYear()}</span>
+          <span className="hidden sm:inline">DiDi · Shopee · Mozat</span>
+          <span className="inline-flex items-center gap-2">
+            Scroll
+            <motion.span
+              animate={prefersReducedMotion ? {} : { y: [0, 4, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+              className="inline-flex"
+            >
+              <ArrowDown size={12} />
+            </motion.span>
+          </span>
+        </div>
+      </motion.div>
     </section>
   );
 }

@@ -36,7 +36,7 @@ export function GlassPanel({
   return (
     <Component
       ref={ref}
-      className={cn("glass rounded-2xl p-6", className)}
+      className={cn("glass rounded-sm p-6", className)}
       style={{
         transform,
         transition: hover3d ? "transform 0.3s ease-out" : undefined,

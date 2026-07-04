@@ -15,8 +15,8 @@ export function BlogRenderer({ content, className }: BlogRendererProps) {
         "prose-p:text-muted prose-p:leading-relaxed",
         "prose-a:text-accent prose-a:no-underline hover:prose-a:underline",
         "prose-strong:text-foreground",
-        "prose-code:text-accent prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded",
-        "prose-pre:bg-white/5 prose-pre:border prose-pre:border-white/10 prose-pre:rounded-xl",
+        "prose-code:text-accent prose-code:bg-foreground/[0.05] prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded",
+        "prose-pre:bg-foreground/[0.04] prose-pre:border prose-pre:border-border prose-pre:rounded-sm",
         "prose-img:rounded-2xl",
         "prose-blockquote:border-accent prose-blockquote:text-muted",
         className

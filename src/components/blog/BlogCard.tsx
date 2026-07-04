@@ -29,7 +29,7 @@ export function BlogCard({
 }: BlogCardProps) {
   return (
     <Link href={`/blog/${slug}`} className="group block">
-      <article className="glass rounded-2xl overflow-hidden transition-all duration-300 hover:bg-white/8 h-full flex flex-col">
+      <article className="glass rounded-sm overflow-hidden transition-colors duration-200 hover:border-accent/50 h-full flex flex-col">
         {coverImage && (
           <div className="aspect-video overflow-hidden">
             <img

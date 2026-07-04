@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { inter } from "@/styles/fonts";
+import { inter, playfair } from "@/styles/fonts";
 import { ToastProvider } from "@/components/ui/Toast";
 import { PageTracker } from "@/components/PageTracker";
 import "./globals.css";
@@ -20,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className={`${inter.variable} antialiased`}>
+    <html lang="en">
+      <body className={`${inter.variable} ${playfair.variable} antialiased`}>
         <PageTracker />
         <ToastProvider>{children}</ToastProvider>
       </body>

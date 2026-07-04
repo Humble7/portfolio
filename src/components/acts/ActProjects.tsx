@@ -20,45 +20,40 @@ interface Project {
   liveUrl: string | null;
 }
 
-const COLORS = [
-  "from-violet-500/20 to-fuchsia-500/20",
-  "from-orange-500/20 to-amber-500/20",
-  "from-blue-500/20 to-purple-500/20",
-  "from-green-500/20 to-cyan-500/20",
-  "from-pink-500/20 to-violet-500/20",
-];
-
-function ProjectCardContent({ project, colorClass }: { project: Project; colorClass: string }) {
+function ProjectCardContent({ project, index }: { project: Project; index: number }) {
   return (
-    <div
-      className={`glass rounded-3xl p-8 md:p-12 h-full flex flex-col overflow-hidden bg-gradient-to-br ${colorClass}`}
-    >
+    <div className="glass rounded-sm p-8 md:p-10 h-full flex flex-col overflow-hidden">
       {/* Media area — flex-1 min-h-0 so it shrinks to fit available space */}
       {project.youtubeUrl ? (
         <div className="flex-1 min-h-0 mb-6">
           <YouTubeLazy url={project.youtubeUrl} className="h-full" />
         </div>
       ) : project.coverImage ? (
-        <div className="flex-1 min-h-0 rounded-2xl overflow-hidden mb-6">
+        <div className="flex-1 min-h-0 rounded-sm overflow-hidden mb-6 border hairline">
           <img src={project.coverImage} alt={project.title} className="w-full h-full object-cover" />
         </div>
       ) : (
-        <div className="flex-1 min-h-0 rounded-2xl bg-white/5 mb-6 flex items-center justify-center">
-          <Play size={48} className="text-muted/30" />
+        <div className="flex-1 min-h-0 rounded-sm bg-foreground/[0.04] border hairline mb-6 flex items-center justify-center">
+          <Play size={48} className="text-muted/40" />
         </div>
       )}
 
       {/* Text content — shrink-0 so it always displays fully */}
       <div className="shrink-0">
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags.map((tag) => (
-            <Badge key={tag} variant="accent">
-              {tag}
-            </Badge>
-          ))}
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-wrap gap-2">
+            {project.tags.map((tag) => (
+              <Badge key={tag} variant="accent">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+          <span className="font-mono text-xs text-muted">
+            {String(index + 1).padStart(2, "0")}
+          </span>
         </div>
 
-        <h3 className="text-2xl md:text-3xl font-bold mb-3">
+        <h3 className="font-serif text-3xl md:text-4xl mb-3">
           {project.title}
         </h3>
         <p className="text-muted leading-relaxed mb-6 max-w-lg line-clamp-3">
@@ -99,10 +94,8 @@ function SectionHeader({ label, heading }: { label: string; heading: string }) {
     <div className="pt-24 pb-8 px-6">
       <div className="max-w-7xl mx-auto">
         <FadeInOnScroll>
-          <p className="text-accent text-sm uppercase tracking-widest mb-4">
-            {label}
-          </p>
-          <h2 className="text-4xl sm:text-5xl md:text-6xl font-bold">
+          <p className="kicker mb-6">04 — {label}</p>
+          <h2 className="font-serif text-4xl sm:text-5xl md:text-6xl">
             {heading}
           </h2>
         </FadeInOnScroll>
@@ -119,7 +112,7 @@ function SingleProject({ project, label, heading }: { project: Project; label: s
       <div className="px-6 pb-24">
         <div className="max-w-4xl mx-auto">
           <FadeInOnScroll>
-            <ProjectCardContent project={project} colorClass={COLORS[0]} />
+            <ProjectCardContent project={project} index={0} />
           </FadeInOnScroll>
         </div>
       </div>
@@ -136,7 +129,7 @@ function MobileGallery({ projects }: { projects: Project[] }) {
           key={project.id}
           className="min-w-[85vw] snap-center"
         >
-          <ProjectCardContent project={project} colorClass={COLORS[i % COLORS.length]} />
+          <ProjectCardContent project={project} index={i} />
         </div>
       ))}
     </div>
@@ -170,7 +163,7 @@ function MultipleProjects({ projects, label, heading }: { projects: Project[]; l
     measure();
     window.addEventListener("resize", measure);
     return () => window.removeEventListener("resize", measure);
-  }, [projects]);
+  }, [projects, isMobile]);
 
   const { scrollYProgress } = useScroll({
     target: containerRef,
@@ -213,7 +206,7 @@ function MultipleProjects({ projects, label, heading }: { projects: Project[]; l
                 key={project.id}
                 className="min-w-[60vw] lg:min-w-[50vw] h-full"
               >
-                <ProjectCardContent project={project} colorClass={COLORS[i % COLORS.length]} />
+                <ProjectCardContent project={project} index={i} />
               </div>
             ))}
           </motion.div>
@@ -253,7 +246,8 @@ export function ActProjects() {
   return <MultipleProjects projects={projects} label={label} heading={heading} />;
 }
 
-// Bug 6: Clamp input range so first/last dots transition correctly
+// Dots map to progress 0..1 across (total - 1) transitions, so the last dot
+// peaks exactly at progress 1 and the first at 0.
 function ProjectDot({
   index,
   progress,
@@ -263,15 +257,17 @@ function ProjectDot({
   progress: ReturnType<typeof useScroll>["scrollYProgress"];
   total: number;
 }) {
-  const opacity = useTransform(
-    progress,
-    [
-      Math.max(0, (index - 0.5) / total),
-      index / total,
-      Math.min(1, (index + 0.5) / total),
-    ],
-    [0.3, 1, 0.3]
-  );
+  const step = total > 1 ? 1 / (total - 1) : 1;
+  const center = index * step;
+  // First/last dots only have a one-sided ramp; input values must stay strictly increasing
+  const input =
+    index === 0
+      ? [center, center + step / 2]
+      : index === total - 1
+      ? [center - step / 2, center]
+      : [center - step / 2, center, center + step / 2];
+  const output = index === 0 ? [1, 0.3] : index === total - 1 ? [0.3, 1] : [0.3, 1, 0.3];
+  const opacity = useTransform(progress, input, output);
 
   return (
     <motion.div
