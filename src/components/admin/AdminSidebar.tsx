@@ -11,6 +11,7 @@ import {
   MessageSquare,
   BarChart3,
   PenLine,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -27,6 +28,7 @@ const navItems = [
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
   { href: "/admin/content", label: "Content", icon: PenLine },
   { href: "/admin/analytics", label: "Analytics", icon: BarChart3 },
+  { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 
 export function AdminSidebar() {
